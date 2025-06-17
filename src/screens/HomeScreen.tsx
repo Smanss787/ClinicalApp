@@ -2,26 +2,25 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
   TextInput,
+  TouchableOpacity,
+  StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  FlatList,
+  ScrollView,
 } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
-interface TodoItem {
+interface Todo {
   id: string;
   text: string;
   completed: boolean;
 }
 
 export const HomeScreen = ({ navigation }: any) => {
-  const [todos, setTodos] = useState<TodoItem[]>([
-    { id: '1', text: 'Learn React Native', completed: false },
-    { id: '2', text: 'Build a Todo App', completed: false },
-    { id: '3', text: 'Master Navigation', completed: false },
-  ]);
+  const { user, logout } = useAuth();
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState('');
 
   const addTodo = () => {
@@ -50,17 +49,28 @@ export const HomeScreen = ({ navigation }: any) => {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
 
-  const renderItem = ({ item }: { item: TodoItem }) => (
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigation.replace('Login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const renderItem = ({ item }: { item: Todo }) => (
     <View style={styles.todoItem}>
-      <TouchableOpacity
-        style={styles.todoTextContainer}
-        onPress={() => toggleTodo(item.id)}
-      >
-        <View style={[styles.checkbox, item.completed && styles.checkboxCompleted]} />
-        <Text style={[styles.todoText, item.completed && styles.todoTextCompleted]}>
+      <View style={styles.todoTextContainer}>
+        <TouchableOpacity
+          style={[styles.checkbox, item.completed && styles.checkboxCompleted]}
+          onPress={() => toggleTodo(item.id)}
+        />
+        <Text
+          style={[styles.todoText, item.completed && styles.todoTextCompleted]}
+        >
           {item.text}
         </Text>
-      </TouchableOpacity>
+      </View>
       <TouchableOpacity
         style={styles.deleteButton}
         onPress={() => deleteTodo(item.id)}
@@ -71,41 +81,60 @@ export const HomeScreen = ({ navigation }: any) => {
   );
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.header}>
-        <Text style={styles.title}>My Todo List</Text>
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={() => navigation.replace('Login')}
-        >
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Welcome</Text>
+          <Text style={styles.subtitle}>{user?.email}</Text>
+        </View>
+
+        <View style={styles.content}>
+          <Text style={styles.sectionTitle}>Your Profile</Text>
+          <View style={styles.profileInfo}>
+            <Text style={styles.label}>Email:</Text>
+            <Text style={styles.value}>{user?.email}</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.label}>Name:</Text>
+            <Text style={styles.value}>{user?.name || 'Not provided'}</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
 
-      <FlatList
-        data={todos}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-        contentContainerStyle={styles.listContent}
-      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>My Todo List</Text>
+        </View>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Add a new todo"
-          value={newTodo}
-          onChangeText={setNewTodo}
-          onSubmitEditing={addTodo}
+        <FlatList
+          data={todos}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
         />
-        <TouchableOpacity style={styles.addButton} onPress={addTodo}>
-          <Text style={styles.addButtonText}>Add</Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Add a new todo"
+            value={newTodo}
+            onChangeText={setNewTodo}
+            onSubmitEditing={addTodo}
+          />
+          <TouchableOpacity style={styles.addButton} onPress={addTodo}>
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -114,25 +143,59 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  scrollContainer: {
+    flexGrow: 1,
     padding: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
-    backgroundColor: '#007AFF',
+  },
+  header: {
+    marginBottom: 30,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#333',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+  },
+  content: {
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  label: {
+    fontSize: 16,
+    color: '#666',
+    width: 80,
+  },
+  value: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
   },
   logoutButton: {
-    padding: 8,
+    backgroundColor: '#ff3b30',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
   },
   logoutButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   list: {
     flex: 1,

@@ -8,19 +8,21 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
 interface ForgotPasswordFormData {
   email: string;
 }
 
 export const ForgotPasswordScreen = ({ navigation }: any) => {
+  const { resetPassword } = useAuth();
   const [formData, setFormData] = useState<ForgotPasswordFormData>({
     email: '',
   });
-
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<ForgotPasswordFormData>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = () => {
     const newErrors: Partial<ForgotPasswordFormData> = {};
@@ -35,12 +37,11 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (validateForm()) {
-      setIsSubmitting(true);
-      // TODO: Implement password reset logic here
-      setTimeout(() => {
-        setIsSubmitting(false);
+      try {
+        setIsLoading(true);
+        await resetPassword(formData.email);
         Alert.alert(
           'Reset Link Sent',
           'If an account exists with this email, you will receive a password reset link.',
@@ -51,7 +52,14 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
             },
           ]
         );
-      }, 1500);
+      } catch (error: any) {
+        Alert.alert(
+          'Reset Failed',
+          error.message || 'An error occurred while sending the reset link. Please try again.'
+        );
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -65,7 +73,7 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
         <Text style={styles.subtitle}>
           Enter your email address and we'll send you a link to reset your password.
         </Text>
-        
+
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Email</Text>
           <TextInput
@@ -75,25 +83,27 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
             autoCapitalize="none"
             value={formData.email}
             onChangeText={(text) => setFormData({ ...formData, email: text })}
-            editable={!isSubmitting}
+            editable={!isLoading}
           />
           {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
         </View>
 
-        <TouchableOpacity 
-          style={[styles.button, isSubmitting && styles.buttonDisabled]} 
+        <TouchableOpacity
+          style={[styles.button, isLoading && styles.buttonDisabled]}
           onPress={handleResetPassword}
-          disabled={isSubmitting}
+          disabled={isLoading}
         >
-          <Text style={styles.buttonText}>
-            {isSubmitting ? 'Sending...' : 'Send Reset Link'}
-          </Text>
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Send Reset Link</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.backToLogin}
           onPress={() => navigation.navigate('Login')}
-          disabled={isSubmitting}
+          disabled={isLoading}
         >
           <Text style={styles.backToLoginText}>Back to Login</Text>
         </TouchableOpacity>
@@ -108,31 +118,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   formContainer: {
-    padding: 20,
     flex: 1,
+    padding: 20,
     justifyContent: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 10,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
     textAlign: 'center',
     marginBottom: 30,
-    paddingHorizontal: 20,
   },
   inputContainer: {
     marginBottom: 20,
   },
   label: {
     fontSize: 16,
+    marginBottom: 5,
     color: '#333',
-    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
@@ -140,34 +148,32 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
   },
   errorText: {
-    color: '#ff3b30',
-    fontSize: 14,
-    marginTop: 4,
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
   },
   button: {
     backgroundColor: '#007AFF',
-    padding: 16,
+    padding: 15,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 10,
+    marginBottom: 20,
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    opacity: 0.7,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   backToLogin: {
-    marginTop: 20,
     alignItems: 'center',
   },
   backToLoginText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#007AFF',
   },
 }); 

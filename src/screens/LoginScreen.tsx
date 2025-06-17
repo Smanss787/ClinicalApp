@@ -8,7 +8,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginFormData {
   email: string;
@@ -16,11 +18,12 @@ interface LoginFormData {
 }
 
 export const LoginScreen = ({ navigation }: any) => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
   });
-
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<LoginFormData>>({});
 
   const validateForm = () => {
@@ -40,10 +43,20 @@ export const LoginScreen = ({ navigation }: any) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validateForm()) {
-      // Navigate to Home screen on successful login
-      navigation.replace('Home');
+      try {
+        setIsLoading(true);
+        await login(formData.email, formData.password);
+        navigation.replace('Home');
+      } catch (error: any) {
+        Alert.alert(
+          'Login Failed',
+          error.message || 'An error occurred during login. Please try again.'
+        );
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -64,6 +77,7 @@ export const LoginScreen = ({ navigation }: any) => {
             autoCapitalize="none"
             value={formData.email}
             onChangeText={(text) => setFormData({ ...formData, email: text })}
+            editable={!isLoading}
           />
           {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
         </View>
@@ -76,6 +90,7 @@ export const LoginScreen = ({ navigation }: any) => {
             secureTextEntry
             value={formData.password}
             onChangeText={(text) => setFormData({ ...formData, password: text })}
+            editable={!isLoading}
           />
           {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
         </View>
@@ -83,17 +98,27 @@ export const LoginScreen = ({ navigation }: any) => {
         <TouchableOpacity 
           style={styles.forgotPassword}
           onPress={() => navigation.navigate('ForgotPassword')}
+          disabled={isLoading}
         >
           <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
+        <TouchableOpacity 
+          style={[styles.button, isLoading && styles.buttonDisabled]} 
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.registerLink}
           onPress={() => navigation.navigate('Register')}
+          disabled={isLoading}
         >
           <Text style={styles.registerText}>
             Don't have an account? <Text style={styles.registerTextBold}>Register</Text>
@@ -110,14 +135,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   formContainer: {
-    padding: 20,
     flex: 1,
+    padding: 20,
     justifyContent: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 30,
     textAlign: 'center',
   },
@@ -126,8 +150,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
+    marginBottom: 5,
     color: '#333',
-    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
@@ -135,12 +159,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
   },
   errorText: {
-    color: '#ff3b30',
-    fontSize: 14,
-    marginTop: 4,
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
@@ -148,30 +171,32 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     color: '#007AFF',
-    fontSize: 16,
+    fontSize: 14,
   },
   button: {
     backgroundColor: '#007AFF',
-    padding: 16,
+    padding: 15,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 10,
+    marginBottom: 20,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   registerLink: {
-    marginTop: 20,
     alignItems: 'center',
   },
   registerText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
   },
   registerTextBold: {
+    fontWeight: 'bold',
     color: '#007AFF',
-    fontWeight: '600',
   },
 }); 

@@ -9,7 +9,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
 interface RegisterFormData {
   fullName: string;
@@ -19,13 +21,14 @@ interface RegisterFormData {
 }
 
 export const RegisterScreen = ({ navigation }: any) => {
+  const { register } = useAuth();
   const [formData, setFormData] = useState<RegisterFormData>({
     fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
-
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<RegisterFormData>>({});
 
   const validateForm = () => {
@@ -55,10 +58,29 @@ export const RegisterScreen = ({ navigation }: any) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (validateForm()) {
-      // TODO: Implement registration logic here
-      Alert.alert('Success', 'Registration successful!');
+      try {
+        setIsLoading(true);
+        await register(formData.email, formData.password);
+        Alert.alert(
+          'Registration Successful',
+          'Please check your email to verify your account.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Login'),
+            },
+          ]
+        );
+      } catch (error: any) {
+        Alert.alert(
+          'Registration Failed',
+          error.message || 'An error occurred during registration. Please try again.'
+        );
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -70,7 +92,7 @@ export const RegisterScreen = ({ navigation }: any) => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>Create Account</Text>
-          
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Full Name</Text>
             <TextInput
@@ -78,6 +100,7 @@ export const RegisterScreen = ({ navigation }: any) => {
               placeholder="Enter your full name"
               value={formData.fullName}
               onChangeText={(text) => setFormData({ ...formData, fullName: text })}
+              editable={!isLoading}
             />
             {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
           </View>
@@ -91,6 +114,7 @@ export const RegisterScreen = ({ navigation }: any) => {
               autoCapitalize="none"
               value={formData.email}
               onChangeText={(text) => setFormData({ ...formData, email: text })}
+              editable={!isLoading}
             />
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
           </View>
@@ -103,6 +127,7 @@ export const RegisterScreen = ({ navigation }: any) => {
               secureTextEntry
               value={formData.password}
               onChangeText={(text) => setFormData({ ...formData, password: text })}
+              editable={!isLoading}
             />
             {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
           </View>
@@ -115,19 +140,29 @@ export const RegisterScreen = ({ navigation }: any) => {
               secureTextEntry
               value={formData.confirmPassword}
               onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
+              editable={!isLoading}
             />
             {errors.confirmPassword && (
               <Text style={styles.errorText}>{errors.confirmPassword}</Text>
             )}
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>Register</Text>
+          <TouchableOpacity
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            onPress={handleRegister}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Register</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.loginLink}
             onPress={() => navigation.navigate('Login')}
+            disabled={isLoading}
           >
             <Text style={styles.loginText}>
               Already have an account? <Text style={styles.loginTextBold}>Login</Text>
@@ -148,14 +183,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   formContainer: {
-    padding: 20,
     flex: 1,
+    padding: 20,
     justifyContent: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 30,
     textAlign: 'center',
   },
@@ -164,8 +198,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
+    marginBottom: 5,
     color: '#333',
-    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
@@ -173,35 +207,36 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
   },
   errorText: {
-    color: '#ff3b30',
-    fontSize: 14,
-    marginTop: 4,
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
   },
   button: {
     backgroundColor: '#007AFF',
-    padding: 16,
+    padding: 15,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 10,
+    marginBottom: 20,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   loginLink: {
-    marginTop: 20,
     alignItems: 'center',
   },
   loginText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
   },
   loginTextBold: {
+    fontWeight: 'bold',
     color: '#007AFF',
-    fontWeight: '600',
   },
 }); 
