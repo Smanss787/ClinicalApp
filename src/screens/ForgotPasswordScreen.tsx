@@ -9,12 +9,21 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Modal,
+  Pressable,
+  FlatList,
+  Linking,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
 interface ForgotPasswordFormData {
   email: string;
 }
+
+const LANGUAGES = [
+  { label: 'English', value: 'en' },
+  { label: 'French', value: 'fr' },
+];
 
 export const ForgotPasswordScreen = ({ navigation }: any) => {
   const { resetPassword } = useAuth();
@@ -23,6 +32,8 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<ForgotPasswordFormData>>({});
+  const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGES[0]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const validateForm = () => {
     const newErrors: Partial<ForgotPasswordFormData> = {};
@@ -68,17 +79,59 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>Reset Password</Text>
-        <Text style={styles.subtitle}>
-          Enter your email address and we'll send you a link to reset your password.
+      {/* Top bar with back arrow and language dropdown */}
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backArrow}>{'<'}</Text>
+        </TouchableOpacity>
+        <View style={styles.languageSelectorContainer}>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Text style={styles.languageSelectorText}>{selectedLanguage.label} ▼</Text>
+          </TouchableOpacity>
+          <Modal
+            visible={modalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
+              <View style={styles.modalContent}>
+                <FlatList
+                  data={LANGUAGES}
+                  keyExtractor={(item) => item.value}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.languageOption}
+                      onPress={() => {
+                        setSelectedLanguage(item);
+                        setModalVisible(false);
+                      }}
+                    >
+                      <Text style={styles.languageOptionText}>{item.label}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </Pressable>
+          </Modal>
+        </View>
+        <View style={{ width: 32 }} /> {/* Spacer to balance the back arrow */}
+      </View>
+
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>Password reset</Text>
+        <View style={styles.dot} />
+        <Text style={styles.instructions}>
+          Please enter your email address.{"\n"}
+          You will receive an email with a link{"\n"}
+          to reset your password.
         </Text>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
+            style={[styles.input, errors.email && styles.inputError]}
+            placeholder="What's your email?"
+            placeholderTextColor="#1a2a36"
             keyboardType="email-address"
             autoCapitalize="none"
             value={formData.email}
@@ -88,24 +141,28 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
           {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
         </View>
 
+        <View style={styles.supportContainer}>
+          <Text style={styles.supportText}>
+            If you don't receive any email, please contact corMed's support :
+          </Text>
+          <Text
+            style={styles.supportEmail}
+            onPress={() => Linking.openURL('mailto:support@ihu-reconnect.com')}
+          >
+            support@ihu-reconnect.com
+          </Text>
+        </View>
+
         <TouchableOpacity
           style={[styles.button, isLoading && styles.buttonDisabled]}
           onPress={handleResetPassword}
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#1a2a36" />
           ) : (
-            <Text style={styles.buttonText}>Send Reset Link</Text>
+            <Text style={styles.buttonText}>Reset my password</Text>
           )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.backToLogin}
-          onPress={() => navigation.navigate('Login')}
-          disabled={isLoading}
-        >
-          <Text style={styles.backToLoginText}>Back to Login</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -117,63 +174,134 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  formContainer: {
-    flex: 1,
-    padding: 20,
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 50 : 24,
+    marginBottom: 10,
+  },
+  backButton: {
+    width: 32,
+    height: 32,
     justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  backArrow: {
+    fontSize: 28,
+    color: '#1a2a36',
+    fontWeight: '300',
+  },
+  languageSelectorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  languageSelectorText: {
+    color: '#1a2a36',
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    minWidth: 150,
+    elevation: 5,
+    marginTop: 60,
+    maxHeight: 120,
+  },
+  languageOption: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  languageOptionText: {
+    fontSize: 16,
+    color: '#1a2a36',
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 30,
+    justifyContent: 'flex-start',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#1a2a36',
+    textAlign: 'center',
+    marginTop: 30,
     marginBottom: 10,
-    textAlign: 'center',
   },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 30,
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#1a2a36',
+    alignSelf: 'center',
+    marginBottom: 24,
+  },
+  instructions: {
+    fontSize: 18,
+    color: '#1a2a36',
+    textAlign: 'left',
+    marginBottom: 40,
+    lineHeight: 24,
   },
   inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-    color: '#333',
+    marginBottom: 40,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderBottomWidth: 1.5,
+    borderColor: '#1a2a36',
+    borderRadius: 0,
+    paddingVertical: 10,
     fontSize: 16,
+    color: '#1a2a36',
+    backgroundColor: 'transparent',
+  },
+  inputError: {
+    borderColor: 'red',
   },
   errorText: {
     color: 'red',
     fontSize: 12,
     marginTop: 5,
   },
+  supportContainer: {
+    marginBottom: 40,
+  },
+  supportText: {
+    fontSize: 15,
+    color: '#1a2a36',
+    marginBottom: 2,
+  },
+  supportEmail: {
+    color: '#1a2a36',
+    fontSize: 15,
+    textDecorationLine: 'underline',
+  },
   button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#1a2a36',
+    backgroundColor: 'transparent',
+    paddingVertical: 16,
+    borderRadius: 4,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  backToLogin: {
-    alignItems: 'center',
-  },
-  backToLoginText: {
-    fontSize: 14,
-    color: '#007AFF',
+    color: '#1a2a36',
+    fontSize: 18,
+    fontWeight: '400',
   },
 }); 

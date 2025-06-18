@@ -9,6 +9,10 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  FlatList,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,6 +20,11 @@ interface LoginFormData {
   email: string;
   password: string;
 }
+
+const LANGUAGES = [
+  { label: 'English', value: 'en' },
+  { label: 'French', value: 'fr' },
+];
 
 export const LoginScreen = ({ navigation }: any) => {
   const { login } = useAuth();
@@ -25,6 +34,8 @@ export const LoginScreen = ({ navigation }: any) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<LoginFormData>>({});
+  const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGES[0]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const validateForm = () => {
     const newErrors: Partial<LoginFormData> = {};
@@ -65,14 +76,53 @@ export const LoginScreen = ({ navigation }: any) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+      {/* Language Selector Dropdown */}
+      <View style={styles.languageSelectorContainer}>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Text style={styles.languageSelectorText}>{selectedLanguage.label} ▼</Text>
+        </TouchableOpacity>
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
+            <View style={styles.modalContent}>
+              <FlatList
+                data={LANGUAGES}
+                keyExtractor={(item) => item.value}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.languageOption}
+                    onPress={() => {
+                      setSelectedLanguage(item);
+                      setModalVisible(false);
+                    }}
+                  >
+                    <Text style={styles.languageOptionText}>{item.label}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </Pressable>
+        </Modal>
+      </View>
+
+      {/* Logo and App Name */}
+      <View style={styles.logoContainer}>
+        {/* Replace with your logo image if available */}
+        <View style={styles.logoPlaceholder} />
+        <Text style={styles.logoText}>corMed</Text>
+        <View style={styles.dot} />
+      </View>
+
       <View style={styles.formContainer}>
-        <Text style={styles.title}>Welcome Back</Text>
-        
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
+            style={[styles.input, errors.email && styles.inputError]}
+            placeholder="What's your email?"
+            placeholderTextColor="#1a2a36"
             keyboardType="email-address"
             autoCapitalize="none"
             value={formData.email}
@@ -83,10 +133,10 @@ export const LoginScreen = ({ navigation }: any) => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
+            style={[styles.input, errors.password && styles.inputError]}
+            placeholder="What's your password ?"
+            placeholderTextColor="#1a2a36"
             secureTextEntry
             value={formData.password}
             onChangeText={(text) => setFormData({ ...formData, password: text })}
@@ -95,35 +145,35 @@ export const LoginScreen = ({ navigation }: any) => {
           {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.forgotPassword}
           onPress={() => navigation.navigate('ForgotPassword')}
           disabled={isLoading}
         >
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.button, isLoading && styles.buttonDisabled]} 
+        <TouchableOpacity
+          style={[styles.button, isLoading && styles.buttonDisabled]}
           onPress={handleLogin}
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#1a2a36" />
           ) : (
-            <Text style={styles.buttonText}>Login</Text>
+            <Text style={styles.buttonText}>Log in</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.registerLink}
-          onPress={() => navigation.navigate('Register')}
-          disabled={isLoading}
-        >
-          <Text style={styles.registerText}>
-            Don't have an account? <Text style={styles.registerTextBold}>Register</Text>
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.bottomTextContainer}>
+          <Text style={styles.bottomText}>No account yet ? </Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Register')}
+            disabled={isLoading}
+          >
+            <Text style={styles.signUpText}>Sign up</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -133,32 +183,89 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    justifyContent: 'flex-start',
+  },
+  languageSelectorContainer: {
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 10,
+  },
+  languageSelectorText: {
+    color: '#1a2a36',
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    minWidth: 150,
+    elevation: 5,
+    marginTop: 60,
+    maxHeight: 120,
+  },
+  languageOption: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  languageOptionText: {
+    fontSize: 16,
+    color: '#1a2a36',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 40,
+  },
+  logoPlaceholder: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 2,
+    borderColor: '#1a2a36',
+    marginBottom: 10,
+    // You can replace this with an Image component for your logo
+  },
+  logoText: {
+    fontSize: 32,
+    fontWeight: '400',
+    color: '#1a2a36',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
+    marginBottom: 10,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#1a2a36',
+    marginBottom: 20,
   },
   formContainer: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
+    paddingHorizontal: 30,
+    justifyContent: 'flex-start',
   },
   inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-    color: '#333',
+    marginBottom: 18,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderBottomWidth: 1.5,
+    borderColor: '#1a2a36',
+    borderRadius: 0,
+    paddingVertical: 10,
     fontSize: 16,
+    color: '#1a2a36',
+    backgroundColor: 'transparent',
+  },
+  inputError: {
+    borderColor: 'red',
   },
   errorText: {
     color: 'red',
@@ -166,37 +273,48 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 20,
+    alignSelf: 'flex-start',
+    marginBottom: 30,
   },
   forgotPasswordText: {
-    color: '#007AFF',
-    fontSize: 14,
+    color: '#1a2a36',
+    fontSize: 13,
+    textDecorationLine: 'underline',
+    opacity: 0.8,
   },
   button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#1a2a36',
+    backgroundColor: 'transparent',
+    paddingVertical: 16,
+    borderRadius: 4,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#1a2a36',
+    fontSize: 18,
+    fontWeight: '400',
   },
-  registerLink: {
+  bottomTextContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 10,
   },
-  registerText: {
+  bottomText: {
+    color: '#1a2a36',
     fontSize: 14,
-    color: '#666',
+    opacity: 0.7,
   },
-  registerTextBold: {
+  signUpText: {
+    color: '#1a2a36',
+    fontSize: 14,
     fontWeight: 'bold',
-    color: '#007AFF',
+    textDecorationLine: 'underline',
+    marginLeft: 2,
   },
 }); 
