@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar, useColorScheme } from 'react-native';
+import { StatusBar, useColorScheme, View, ActivityIndicator } from 'react-native';
 import { RegisterScreen } from './screens/RegisterScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { ForgotPasswordScreen } from './screens/ForgotPasswordScreen';
@@ -13,9 +13,16 @@ import { SignupSuccessScreen } from './screens/SignupSuccessScreen';
 const Stack = createNativeStackNavigator();
 
 function Navigation() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const isDarkMode = useColorScheme() === 'dark';
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+        <ActivityIndicator size="large" color="#1a2a36" />
+      </View>
+    );
+  }
   return (
     <NavigationContainer>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator, Alert } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
 export const TermsScreen = ({ navigation, route }: any) => {
   const { formData } = route.params;
+  const { register } = useAuth();
   const [checked, setChecked] = useState([false, false, false]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleCheck = (idx: number) => {
     setChecked((prev) => prev.map((v, i) => (i === idx ? !v : v)));
@@ -11,9 +15,23 @@ export const TermsScreen = ({ navigation, route }: any) => {
 
   const allChecked = checked.every(Boolean);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (allChecked) {
-      navigation.navigate('SignupSuccessScreen', { formData });
+      setLoading(true);
+      setError(null);
+      try {
+        console.log('formData= ', formData);
+        console.log('register= ', register);
+        console.log('email= ', formData.email);
+        console.log('password= ', formData.password);
+        await register("tuan.ngothanhmg+prod555@gmail.com", formData.password);
+        navigation.navigate('SignupSuccessScreen', { formData });
+      } catch (err: any) {
+        setError(err.message || 'Registration failed. Please try again.');
+        Alert.alert('Registration Failed', err.message || 'Registration failed. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -58,10 +76,15 @@ export const TermsScreen = ({ navigation, route }: any) => {
       <TouchableOpacity
         style={[styles.button, !allChecked && styles.buttonDisabled]}
         onPress={handleContinue}
-        disabled={!allChecked}
+        disabled={!allChecked || loading}
       >
-        <Text style={styles.buttonText}>Done</Text>
+        {loading ? (
+          <ActivityIndicator color="#1a2a36" />
+        ) : (
+          <Text style={styles.buttonText}>Done</Text>
+        )}
       </TouchableOpacity>
+      {error && <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>{error}</Text>}
     </ScrollView>
   );
 };

@@ -9,13 +9,15 @@ interface AuthContextType {
   logout: () => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check for existing session
@@ -23,15 +25,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const checkSession = async () => {
+    setLoading(true);
     try {
       const credentials = await AsyncStorage.getItem('auth0_credentials');
       if (credentials) {
         const parsedCredentials = JSON.parse(credentials);
-        setUser(parsedCredentials.user);
-        setIsAuthenticated(true);
+        try {
+          // Validate token remotely by calling userInfo
+          const userInfo = await auth0.auth.userInfo({ token: parsedCredentials.accessToken });
+          setUser(userInfo);
+          setIsAuthenticated(true);
+          // Optionally update stored user info
+          await AsyncStorage.setItem('auth0_credentials', JSON.stringify({
+            ...parsedCredentials,
+            user: userInfo,
+          }));
+        } catch (err) {
+          // Token invalid or expired, clear credentials
+          await AsyncStorage.removeItem('auth0_credentials');
+          setUser(null);
+          setIsAuthenticated(false);
+        }
       }
     } catch (error) {
       console.error('Error checking session:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,9 +61,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password: password,
         realm: 'Username-Password-Authentication',
       });
+      console.log('Auth0 passwordRealm response:', credentials);
 
       const userInfo = await auth0.auth.userInfo({ token: credentials.accessToken });
-      
+      console.log('Auth0 userInfo response:', userInfo);
+
       await AsyncStorage.setItem('auth0_credentials', JSON.stringify({
         ...credentials,
         user: userInfo,
@@ -103,6 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         register,
         resetPassword,
+        loading,
       }}
     >
       {children}
@@ -112,6 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+  console.log('useAuth context', context);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

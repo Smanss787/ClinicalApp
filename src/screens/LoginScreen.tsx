@@ -36,6 +36,7 @@ export const LoginScreen = ({ navigation }: any) => {
   const [errors, setErrors] = useState<Partial<LoginFormData>>({});
   const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGES[0]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = () => {
     const newErrors: Partial<LoginFormData> = {};
@@ -133,15 +134,20 @@ export const LoginScreen = ({ navigation }: any) => {
         </View>
 
         <View style={styles.inputContainer}>
-          <TextInput
-            style={[styles.input, errors.password && styles.inputError]}
-            placeholder="What's your password ?"
-            placeholderTextColor="#1a2a36"
-            secureTextEntry
-            value={formData.password}
-            onChangeText={(text) => setFormData({ ...formData, password: text })}
-            editable={!isLoading}
-          />
+          <View style={styles.inputRow}>
+            <TextInput
+              style={[styles.input, errors.password && styles.inputError, { flex: 1 }]}
+              placeholder="What's your password ?"
+              placeholderTextColor="#1a2a36"
+              secureTextEntry={!showPassword}
+              value={formData.password}
+              onChangeText={(text) => setFormData({ ...formData, password: text })}
+              editable={!isLoading}
+            />
+            <TouchableOpacity onPress={() => setShowPassword((v) => !v)} style={styles.eyeButton}>
+              <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
+            </TouchableOpacity>
+          </View>
           {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
         </View>
 
@@ -153,26 +159,28 @@ export const LoginScreen = ({ navigation }: any) => {
           <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.button, isLoading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#1a2a36" />
-          ) : (
-            <Text style={styles.buttonText}>Log in</Text>
-          )}
-        </TouchableOpacity>
-
-        <View style={styles.bottomTextContainer}>
-          <Text style={styles.bottomText}>No account yet ? </Text>
+        <View style={styles.buttonBottomContainer}>
           <TouchableOpacity
-            onPress={() => navigation.navigate('Register')}
+            style={[styles.button, styles.buttonCenter, isLoading && styles.buttonDisabled]}
+            onPress={handleLogin}
             disabled={isLoading}
           >
-            <Text style={styles.signUpText}>Sign up</Text>
+            {isLoading ? (
+              <ActivityIndicator color="#1a2a36" />
+            ) : (
+              <Text style={styles.buttonText}>Log in</Text>
+            )}
           </TouchableOpacity>
+
+          <View style={styles.bottomTextContainer}>
+            <Text style={styles.bottomText}>No account yet ? </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Register')}
+              disabled={isLoading}
+            >
+              <Text style={styles.signUpText}>Sign up</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -251,6 +259,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 30,
     justifyContent: 'flex-start',
+    paddingBottom: 40,
   },
   inputContainer: {
     marginBottom: 18,
@@ -289,7 +298,13 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 4,
     alignItems: 'center',
-    marginBottom: 30,
+    width: '50%',
+    alignSelf: 'center',
+    marginTop: 30,
+    marginBottom: 0,
+  },
+  buttonCenter: {
+    alignSelf: 'center',
   },
   buttonDisabled: {
     opacity: 0.7,
@@ -304,6 +319,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
+    marginBottom: 30,
   },
   bottomText: {
     color: '#1a2a36',
@@ -316,5 +332,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textDecorationLine: 'underline',
     marginLeft: 2,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  eyeButton: {
+    padding: 8,
+  },
+  eyeIcon: {
+    fontSize: 20,
+    color: '#1a2a36',
+  },
+  buttonBottomContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: 40,
   },
 }); 

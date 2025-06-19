@@ -9,6 +9,7 @@ import {
   Platform,
   FlatList,
   ScrollView,
+  Image,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
@@ -86,6 +87,9 @@ export const HomeScreen = ({ navigation }: any) => {
         <View style={styles.header}>
           <Text style={styles.title}>Welcome</Text>
           <Text style={styles.subtitle}>{user?.email}</Text>
+          {user?.picture && (
+            <Image source={{ uri: user.picture }} style={styles.avatar} />
+          )}
         </View>
 
         <View style={styles.content}>
@@ -97,6 +101,18 @@ export const HomeScreen = ({ navigation }: any) => {
           <View style={styles.profileInfo}>
             <Text style={styles.label}>Name:</Text>
             <Text style={styles.value}>{user?.name || 'Not provided'}</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.label}>Nickname:</Text>
+            <Text style={styles.value}>{user?.nickname || 'Not provided'}</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.label}>Email Verified:</Text>
+            <Text style={styles.value}>{user?.emailVerified ? 'Yes' : 'No'}</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.label}>Updated At:</Text>
+            <Text style={styles.value}>{user?.updatedAt ? new Date(user.updatedAt).toLocaleString() : 'N/A'}</Text>
           </View>
         </View>
 
@@ -269,5 +285,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignSelf: 'center',
+    marginBottom: 10,
   },
 }); 
