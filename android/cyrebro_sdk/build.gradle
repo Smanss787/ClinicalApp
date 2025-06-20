@@ -1,0 +1,49 @@
+
+//def DEFAULT_COMPILE_SDK_VERSION = 31
+//def DEFAULT_BUILD_TOOLS_VERSION = "31.0.0"
+//def DEFAULT_MIN_SDK_VERSION = 21
+//def DEFAULT_TARGET_SDK_VERSION = 31
+//
+//def safeExtGet(prop, fallback) {
+//    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+//}
+
+apply plugin: 'com.android.library'
+apply plugin:'kotlin-android'
+
+android {
+//    compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
+//    buildToolsVersion safeExtGet('buildToolsVersion', DEFAULT_BUILD_TOOLS_VERSION)
+//    defaultConfig {
+//        minSdkVersion safeExtGet('minSdkVersion', DEFAULT_MIN_SDK_VERSION)
+//        targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
+//        versionCode 2
+//        versionName "1.1"
+//
+//
+//    }
+    compileSdkVersion = 31
+
+        defaultConfig {
+            minSdkVersion 26
+            targetSdkVersion 31
+
+        }
+      compileOptions {
+          sourceCompatibility JavaVersion.VERSION_1_8
+          targetCompatibility JavaVersion.VERSION_1_8
+      }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+
+dependencies {
+    implementation project(':mbt_sdk')
+    implementation project(':jnibrainbox')
+    implementation project(':ble-common')
+    implementation project(':ble-2.3.1')
+    implementation 'com.facebook.react:react-native:+'
+
+}

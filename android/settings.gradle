@@ -3,4 +3,9 @@ plugins { id("com.facebook.react.settings") }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = 'clinicalApp'
 include ':app'
+include ':mbt_sdk'
+include ':jnibrainbox'
+include ':ble-common'
+include ':ble-2.3.1'
+include ':cyrebro_sdk'
 includeBuild('../node_modules/@react-native/gradle-plugin')

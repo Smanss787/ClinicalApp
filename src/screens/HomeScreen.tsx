@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import CyrebroSDK from '../../plugins/CyrebroModule';
 
 interface Todo {
   id: string;
@@ -23,6 +24,16 @@ export const HomeScreen = ({ navigation }: any) => {
   const { user, logout } = useAuth();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState('');
+
+  useEffect(() => {
+    CyrebroSDK.innitSDK()
+      .then((result) => {
+        console.log('CyrebroSDK.initSDK result:', result);
+      })
+      .catch((error) => {
+        console.error('CyrebroSDK.initSDK error:', error);
+      });
+  }, []);
 
   const addTodo = () => {
     if (newTodo.trim()) {

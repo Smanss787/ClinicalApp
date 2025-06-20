@@ -84,6 +84,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        ndk { abiFilters 'arm64-v8a'}
         manifestPlaceholders = [auth0Domain: "dev-a6aw485tz3gri5op.us.auth0.com", auth0Scheme: "${applicationId}.auth0"]
 
     }
@@ -112,7 +113,8 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+    implementation project(':cyrebro_sdk')
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
