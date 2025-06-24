@@ -24,8 +24,8 @@ export const TermsScreen = ({ navigation, route }: any) => {
         console.log('register= ', register);
         console.log('email= ', formData.email);
         console.log('password= ', formData.password);
-        await register("tuan.ngothanhmg+prod555@gmail.com", formData.password);
-        navigation.navigate('SignupSuccessScreen', { formData });
+        await register(formData.email, formData.password);
+        navigation.navigate('SignupSuccessScreen', { email: formData.email, password: formData.password });
       } catch (err: any) {
         setError(err.message || 'Registration failed. Please try again.');
         Alert.alert('Registration Failed', err.message || 'Registration failed. Please try again.');

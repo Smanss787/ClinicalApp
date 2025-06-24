@@ -97,8 +97,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password,
         connection: 'Username-Password-Authentication',
       });
-    } catch (error) {
+    } catch (error: any) {
+      // Log the full error object for debugging
       console.error('Registration error:', error);
+      if (error.json) {
+        // Some Auth0 SDKs return error details in a .json property
+        console.error('Error details:', await error.json);
+      }
       throw error;
     }
   };

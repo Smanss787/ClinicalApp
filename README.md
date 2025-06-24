@@ -66,7 +66,7 @@ This is one way to run your app — you can also build it directly from Android 
 
 Now that you have successfully run the app, let's make changes!
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
 
 When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
 
@@ -85,6 +85,49 @@ You've successfully run and modified your React Native App. :partying_face:
 # Troubleshooting
 
 If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+
+# Permissions System
+
+This app implements a comprehensive permission system for Bluetooth and Location access, which are required for the Cyrebro SDK functionality.
+
+## Required Permissions
+
+The following Android permissions are required and declared in `android/app/src/main/AndroidManifest.xml`:
+
+- `android.permission.BLUETOOTH` - Basic Bluetooth functionality
+- `android.permission.BLUETOOTH_CONNECT` - Connect to Bluetooth devices (Android 12+)
+- `android.permission.BLUETOOTH_SCAN` - Scan for Bluetooth devices (Android 12+)
+- `android.permission.BLUETOOTH_ADMIN` - Bluetooth administration
+- `android.permission.ACCESS_COARSE_LOCATION` - Approximate location access
+- `android.permission.ACCESS_FINE_LOCATION` - Precise location access
+
+## Permission Flow
+
+1. **Initial Check**: When the HomeScreen loads, it automatically checks the current permission status
+2. **Permission Request**: If permissions are not granted, a permission request UI is displayed
+3. **User Action**: Users can either:
+   - Tap "Grant Permissions" to request permissions directly
+   - Tap "Open Settings" to go to app settings
+   - Tap "Refresh Permissions" to re-check after returning from settings
+4. **Success**: Once all permissions are granted, the main app content is displayed and the Cyrebro SDK is initialized
+
+## Implementation Details
+
+- Uses `react-native-permissions` for permission handling
+- Uses `react-native-app-settings` to open app settings
+- Implements `useFocusEffect` to check permissions when returning from settings
+- Provides clear visual feedback on permission status
+- Includes comprehensive error handling and logging
+
+## Testing Permissions
+
+To test the permission system:
+
+1. Run the app on an Android device
+2. If permissions are not granted, you'll see the permission request UI
+3. Grant permissions through the system dialogs
+4. Verify that the main app content appears after permissions are granted
+5. Check the console logs for detailed permission status information
 
 # Learn More
 

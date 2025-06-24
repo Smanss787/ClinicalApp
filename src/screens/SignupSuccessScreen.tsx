@@ -1,7 +1,33 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator, Alert } from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-export const SignupSuccessScreen = ({ navigation }: any) => {
+export const SignupSuccessScreen = () => {
+  const route = useRoute();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { email, password } = route.params as { email: string; password: string };
+  const { login } = useAuth();
+  const [loading, setLoading] = useState(false);
+
+  const handleActivate = async () => {
+    setLoading(true);
+    try {
+      console.log('email= ', email);
+      console.log('password= ', password);
+      await login(email, password);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (error) {
+      Alert.alert('Login Failed', 'Could not activate your account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Well done!</Text>
@@ -18,9 +44,10 @@ export const SignupSuccessScreen = ({ navigation }: any) => {
         Access the application's discovery mode by{' '}
         <Text style={styles.link} onPress={() => Linking.openURL('https://example.com/discovery')}>clicking here</Text>
       </Text>
-      <TouchableOpacity style={styles.button} onPress={() => {/* handle activation */}}>
+      <TouchableOpacity style={styles.button} onPress={handleActivate} disabled={loading}>
         <Text style={styles.buttonText}>Activate my account</Text>
       </TouchableOpacity>
+      {loading && <ActivityIndicator style={{ marginTop: 16 }} />}
     </View>
   );
 };

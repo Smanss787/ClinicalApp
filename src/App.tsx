@@ -9,6 +9,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TermsScreen } from './screens/TermsScreen';
 import { SignupSuccessScreen } from './screens/SignupSuccessScreen';
+import QPlusConnectScreen from './screens/QPlusConnectScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +39,7 @@ function Navigation() {
         <Stack.Screen name="SignupSuccessScreen" component={SignupSuccessScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="QPlusConnect" component={QPlusConnectScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
