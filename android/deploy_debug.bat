@@ -1,0 +1,1 @@
+app:installDebug -PreactNativeDevServerPort=8081

@@ -102,6 +102,14 @@ class CyrebroModule(private val reactContext: ReactApplicationContext) : ReactCo
                     val params = Arguments.createMap()
                     // Example: send channel data as JSON string (customize as needed)
                     params.putString("channelsData", com.google.gson.Gson().toJson(mbtEEGPacket.channelsData))
+                    val qualitiesArray = Arguments.createArray()
+                    for (quality in mbtEEGPacket.qualities) {
+                        // If qualities are Floats or Doubles
+                        qualitiesArray.pushDouble(quality.toDouble())
+                        // If qualities are Integers
+                        // qualitiesArray.pushInt(quality)
+                    }
+                    params.putArray("qualities",qualitiesArray)
                     params.putDouble("timestamp", System.currentTimeMillis().toDouble())
                     sendEvent("onEEGPacket", params)
                 }

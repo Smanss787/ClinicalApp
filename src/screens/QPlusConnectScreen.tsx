@@ -13,6 +13,8 @@ import {
   NativeModules
 } from 'react-native';
 import CyrebroSDK from '../../plugins/CyrebroModule';
+import LinearGradient from 'react-native-linear-gradient';
+import { QualityIndicatorVersion2 } from '../helper/QualityIndicatorVersion2'; // adjust path if needed
 
 interface ScanConfig {
   timeout: number; // in milliseconds
@@ -68,12 +70,22 @@ const QPlusConnectScreen = ({ navigation }: any) => {
   const [eegRunning, setEegRunning] = useState(false);
   const [eegData, setEegData] = useState<any[]>([]);
 
+  // Add state for scores, progress, and the indicator instance
+  const [scores, setScores] = useState<number[]>([]);
+  const [progressTotal, setProgressTotal] = useState<number>(2);
+  const [qualityIndicator] = useState(() => new QualityIndicatorVersion2());
+  const channelNb = 2; // or 4, depending on your device/model
+  const [barWidth, setBarWidth] = useState(0);
+
   useEffect(() => {
     const { CyrebroSDK } = NativeModules;
     const eegEmitter = new NativeEventEmitter(CyrebroSDK);
     const subscription = eegEmitter.addListener('onEEGPacket', (data) => {
-      console.log('EEG event received:', data);
+      // console.log('EEG event received:', data);
+      console.log('EEG event qualities:', data.qualities);
       setEegData(prev => [...prev.slice(-19), data]); // keep last 20 packets
+      // Update quality scores and progress bar with new EEG data
+      updateQualityButtonsAndProgressBar(data.qualities);
     });
     return () => {
       subscription.remove();
@@ -296,6 +308,88 @@ const QPlusConnectScreen = ({ navigation }: any) => {
     </TouchableOpacity>
   );
 
+  /**
+ * Gradient progress bar component for visualizing overall quality.
+ * @param value number (0-100)
+ */
+const QualityGradientProgressBar = ({ value }: { value: number }) => {
+  console.log('[QualityGradientProgressBar] value:', value);
+  return (
+    <View style={{ width: '100%', alignItems: 'center', marginVertical: 16 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', width: '90%' }}>
+        <Text style={{ color: '#888', marginRight: 8 }}>Low</Text>
+        <View
+          style={{ flex: 1, height: 16, justifyContent: 'center', position: 'relative' }}
+          onLayout={e => setBarWidth(e.nativeEvent.layout.width)}
+        >
+          <LinearGradient
+            colors={['#FE3C30', '#FE9502', '#35C56F']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{ position: 'absolute', left: 0, right: 0, height: 8, borderRadius: 4 }}
+          />
+          {/* Thumb */}
+          <View
+            style={{
+              position: 'absolute',
+              left: barWidth ? (value / 100) * barWidth - 9 : 0,
+              top: -5,
+              width: 18,
+              height: 18,
+              borderRadius: 9,
+              backgroundColor: '#fff',
+              borderWidth: 2,
+              borderColor: '#35C56F',
+              zIndex: 2,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.2,
+              shadowRadius: 1.41,
+              elevation: 2,
+            }}
+          />
+        </View>
+        <Text style={{ color: '#888', marginLeft: 8 }}>High</Text>
+      </View>
+    </View>
+  );
+};
+
+  const isIndus5 = () => {
+    // TODO: Replace with your real check
+    return false;
+  };
+
+  const isSignalGoodEnough = (scoreTotal: number) => {
+    return qualityIndicator.isSignalGoodEnough(scoreTotal, channelNb);
+  };
+
+  const updateQualityButtonsAndProgressBar = (qualities?: number[]) => {
+    if (qualities) {
+      qualityIndicator.addNext(qualities);
+    } else {
+      if (isIndus5()) {
+        qualityIndicator.addNext([0, 0, 0, 0]);
+      } else {
+        qualityIndicator.addNext([0, 0]);
+      }
+    }
+    const newScores = qualityIndicator.getScores();
+    setScores(newScores);
+
+    let scoreTotal = newScores.reduce((sum: number, s: number) => sum + s, 0);
+    let progress = (scoreTotal / (QualityIndicatorVersion2.MAX_SCORE * channelNb)) * 100;
+    if (progress < 2) progress = 2;
+    else if (progress > 98) progress = 98;
+    setProgressTotal(progress);
+
+    if (isSignalGoodEnough(scoreTotal)) {
+      // handle show quality is good enough
+    } else {
+      // handle quality still not good enough
+    }
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.title}>Q-Plus Connect</Text>
@@ -460,13 +554,19 @@ const QPlusConnectScreen = ({ navigation }: any) => {
                 )}
               </View>
               {/* EEG Data Demo */}
-              {eegRunning && eegData.length > 0 && (
-                <View style={styles.eegDataBox}>
-                  <Text style={styles.sectionTitle}>Latest EEG Data</Text>
-                  <Text style={styles.eegDataText} numberOfLines={6}>
-                    {JSON.stringify(eegData[eegData.length-1], null, 2)}
-                  </Text>
-                </View>
+              {eegRunning && (
+                <>
+                  {/* Show the gradient progress bar for overall quality */}
+                  <QualityGradientProgressBar value={progressTotal} />
+                  {eegData.length > 0 && (
+                    <View style={styles.eegDataBox}>
+                      <Text style={styles.sectionTitle}>Latest EEG Data</Text>
+                      <Text style={styles.eegDataText} numberOfLines={6}>
+                        {JSON.stringify(eegData[eegData.length-1], null, 2)}
+                      </Text>
+                    </View>
+                  )}
+                </>
               )}
             </View>
           )}
@@ -715,4 +815,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default QPlusConnectScreen; 
+export default QPlusConnectScreen;
