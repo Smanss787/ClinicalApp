@@ -1,8 +1,9 @@
 import { NativeModules } from 'react-native';
 
 interface CyrebroSDKType {
-  // ZeroFace SDK init
-  innitSDK(): Promise<any>;
+  // ZeroFace SDK init with headset selection
+  // headsetId: 'melomind' (value: 1) or 'qplus' (value: 2) or null (default: 0)
+  innitSDK(headsetId?: Int | 0): Promise<any>;
 
   scanDevice(): Promise<any>;
   stopScanDevice(): Promise<any>;

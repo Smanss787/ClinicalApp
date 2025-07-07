@@ -13,6 +13,7 @@ import {
   Alert,
   PermissionsAndroid,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import CyrebroSDK from '../../plugins/CyrebroModule';
@@ -48,10 +49,18 @@ interface ServiceStatus {
   checking: boolean;
 }
 
+interface HeadsetOption {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export const HomeScreen = ({ navigation }: any) => {
   const { user, logout } = useAuth();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState('');
+  const [selectedHeadset, setSelectedHeadset] = useState<HeadsetOption | null>(null);
+  const [showHeadsetDropdown, setShowHeadsetDropdown] = useState(false);
   const [permissions, setPermissions] = useState<PermissionStatus>({
     bluetooth: 'unavailable',
     bluetoothConnect: 'unavailable',
@@ -60,6 +69,20 @@ export const HomeScreen = ({ navigation }: any) => {
     locationCoarse: 'unavailable',
     locationFine: 'unavailable',
   });
+
+  // Headset options
+  const headsetOptions: HeadsetOption[] = [
+    {
+      id: 'melomind',
+      name: 'MeloMind Headset',
+      description: 'Advanced neurofeedback headset for meditation and relaxation',
+    },
+    {
+      id: 'qplus',
+      name: 'QPlus Headset',
+      description: 'Professional-grade headset for clinical applications',
+    },
+  ];
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [sdkStatus, setSdkStatus] = useState<SDKStatus>({
     isInitializing: false,
@@ -162,7 +185,12 @@ export const HomeScreen = ({ navigation }: any) => {
       }));
 
       console.log('Initializing Cyrebro SDK...');
-      const result = await CyrebroSDK.innitSDK();
+      
+      // Pass the selected headset ID to the SDK
+      const headsetId = selectedHeadset?.id || null;
+      console.log('Initializing SDK with headset ID:', headsetId);
+      
+      const result = await CyrebroSDK.innitSDK(headsetId);
       console.log('CyrebroSDK.initSDK result:', result);
       
       setSdkStatus(prev => ({
@@ -174,7 +202,7 @@ export const HomeScreen = ({ navigation }: any) => {
 
       Alert.alert(
         'SDK Initialized',
-        'Cyrebro SDK has been successfully initialized!',
+        `Cyrebro SDK has been successfully initialized for ${selectedHeadset?.name || 'default headset'}!`,
         [{ text: 'OK' }]
       );
     } catch (error) {
@@ -307,6 +335,15 @@ export const HomeScreen = ({ navigation }: any) => {
 
   // Check permissions before navigating to Q-Plus Connect
   const handleQPlusNavigation = () => {
+    if (!selectedHeadset) {
+      Alert.alert(
+        'Headset Selection Required',
+        'Please select a headset before using Q-Plus Connect.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     if (!permissionsGranted) {
       // Check which specific permissions are missing
       const missingPermissions = [];
@@ -383,7 +420,8 @@ export const HomeScreen = ({ navigation }: any) => {
         checkServices().then(() => {
           if (permissionsGranted && sdkStatus.isInitialized && 
               serviceStatus.bluetoothEnabled && serviceStatus.locationEnabled) {
-            navigation.navigate('QPlusConnect');
+            console.log('Navigating to QPlusConnect with headset:', selectedHeadset.name);
+            navigation.navigate('QPlusConnect', { selectedHeadset });
           } else {
             Alert.alert(
               'System Check Failed',
@@ -493,6 +531,17 @@ export const HomeScreen = ({ navigation }: any) => {
     }
   };
 
+  // Headset selection functions
+  const handleHeadsetSelection = (headset: HeadsetOption) => {
+    setSelectedHeadset(headset);
+    setShowHeadsetDropdown(false);
+    console.log('Selected headset:', headset.name);
+  };
+
+  const toggleHeadsetDropdown = () => {
+    setShowHeadsetDropdown(!showHeadsetDropdown);
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -502,6 +551,76 @@ export const HomeScreen = ({ navigation }: any) => {
           {user?.picture && (
             <Image source={{ uri: user.picture }} style={styles.avatar} />
           )}
+        </View>
+
+        {/* Headset Selection Section */}
+        <View style={styles.headsetSection}>
+          <Text style={styles.sectionTitle}>Select Your Headset</Text>
+          <Text style={styles.headsetText}>
+            Choose the headset you want to connect with:
+          </Text>
+          
+          <TouchableOpacity
+            style={styles.headsetDropdown}
+            onPress={toggleHeadsetDropdown}
+          >
+            <Text style={[
+              styles.headsetDropdownText,
+              !selectedHeadset && styles.headsetDropdownPlaceholder
+            ]}>
+              {selectedHeadset ? selectedHeadset.name : 'Select a headset...'}
+            </Text>
+            <Text style={styles.headsetDropdownArrow}>
+              {showHeadsetDropdown ? '▲' : '▼'}
+            </Text>
+          </TouchableOpacity>
+
+          {selectedHeadset && (
+            <View style={styles.selectedHeadsetInfo}>
+              <Text style={styles.selectedHeadsetName}>{selectedHeadset.name}</Text>
+              <Text style={styles.selectedHeadsetDescription}>{selectedHeadset.description}</Text>
+            </View>
+          )}
+
+          {/* Headset Dropdown Modal */}
+          <Modal
+            visible={showHeadsetDropdown}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowHeadsetDropdown(false)}
+          >
+            <TouchableOpacity
+              style={styles.modalOverlay}
+              activeOpacity={1}
+              onPress={() => setShowHeadsetDropdown(false)}
+            >
+              <View style={styles.dropdownContainer}>
+                {headsetOptions.map((headset) => (
+                  <TouchableOpacity
+                    key={headset.id}
+                    style={[
+                      styles.headsetOption,
+                      selectedHeadset?.id === headset.id && styles.headsetOptionSelected
+                    ]}
+                    onPress={() => handleHeadsetSelection(headset)}
+                  >
+                    <Text style={[
+                      styles.headsetOptionText,
+                      selectedHeadset?.id === headset.id && styles.headsetOptionTextSelected
+                    ]}>
+                      {headset.name}
+                    </Text>
+                    <Text style={[
+                      styles.headsetOptionDescription,
+                      selectedHeadset?.id === headset.id && styles.headsetOptionDescriptionSelected
+                    ]}>
+                      {headset.description}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </TouchableOpacity>
+          </Modal>
         </View>
 
         {/* Permission Request Section */}
@@ -625,17 +744,29 @@ export const HomeScreen = ({ navigation }: any) => {
               ]}>
                 <Text style={styles.sdkInitTitle}>SDK Initialization</Text>
                 
+                {!selectedHeadset && (
+                  <View style={styles.sdkInitContent}>
+                    <Text style={styles.sdkInitText}>⚠️ Headset Selection Required</Text>
+                    <Text style={styles.sdkInitSubtext}>Please select a headset before initializing the SDK</Text>
+                  </View>
+                )}
+                
                 {sdkStatus.isInitializing && (
                   <View style={styles.sdkInitContent}>
                     <ActivityIndicator size="small" color="#007AFF" style={styles.sdkInitLoader} />
                     <Text style={styles.sdkInitText}>🔄 Initializing Cyrebro SDK...</Text>
-                    <Text style={styles.sdkInitSubtext}>Please wait while the SDK is being initialized</Text>
+                    <Text style={styles.sdkInitSubtext}>
+                      Initializing for {selectedHeadset?.name || 'default headset'}
+                    </Text>
                   </View>
                 )}
                 
                 {sdkStatus.isInitialized && !sdkStatus.isInitializing && (
                   <View style={styles.sdkInitContent}>
                     <Text style={styles.sdkInitText}>✅ SDK Initialized Successfully</Text>
+                    <Text style={styles.sdkInitSubtext}>
+                      Initialized for: {selectedHeadset?.name || 'default headset'}
+                    </Text>
                     <Text style={styles.sdkInitSubtext}>
                       Last initialized: {sdkStatus.lastAttempt?.toLocaleTimeString() || 'Unknown'}
                     </Text>
@@ -656,18 +787,27 @@ export const HomeScreen = ({ navigation }: any) => {
                       Last attempt: {sdkStatus.lastAttempt?.toLocaleTimeString() || 'Unknown'}
                     </Text>
                     <TouchableOpacity
-                      style={styles.initButton}
+                      style={[
+                        styles.initButton,
+                        !selectedHeadset && styles.initButtonDisabled
+                      ]}
                       onPress={initializeSDK}
+                      disabled={!selectedHeadset}
                     >
-                      <Text style={styles.initButtonText}>Retry Initialization</Text>
+                      <Text style={[
+                        styles.initButtonText,
+                        !selectedHeadset && styles.initButtonTextDisabled
+                      ]}>Retry Initialization</Text>
                     </TouchableOpacity>
                   </View>
                 )}
                 
-                {!sdkStatus.isInitialized && !sdkStatus.isInitializing && !sdkStatus.error && (
+                {!sdkStatus.isInitialized && !sdkStatus.isInitializing && !sdkStatus.error && selectedHeadset && (
                   <View style={styles.sdkInitContent}>
                     <Text style={styles.sdkInitText}>⏳ SDK Not Initialized</Text>
-                    <Text style={styles.sdkInitSubtext}>Click the button below to initialize the SDK</Text>
+                    <Text style={styles.sdkInitSubtext}>
+                      Click the button below to initialize the SDK for {selectedHeadset.name}
+                    </Text>
                     <TouchableOpacity
                       style={styles.initButton}
                       onPress={initializeSDK}
@@ -741,7 +881,7 @@ export const HomeScreen = ({ navigation }: any) => {
             <TouchableOpacity
               style={[
                 styles.qplusButton,
-                (!permissionsGranted || !sdkStatus.isInitialized || 
+                (!selectedHeadset || !permissionsGranted || !sdkStatus.isInitialized || 
                  !serviceStatus.bluetoothEnabled || !serviceStatus.locationEnabled) && styles.qplusButtonDisabled
               ]}
               onPress={handleQPlusNavigation}
@@ -749,20 +889,23 @@ export const HomeScreen = ({ navigation }: any) => {
               <View style={styles.qplusButtonContent}>
                 <Text style={[
                   styles.qplusButtonText,
-                  (!permissionsGranted || !sdkStatus.isInitialized || 
+                  (!selectedHeadset || !permissionsGranted || !sdkStatus.isInitialized || 
                    !serviceStatus.bluetoothEnabled || !serviceStatus.locationEnabled) && styles.qplusButtonTextDisabled
                 ]}>
                   Q-Plus Connect
                 </Text>
-                {!permissionsGranted && (
+                {!selectedHeadset && (
+                  <Text style={styles.qplusButtonInfo}>ℹ️ Headset Selection Required</Text>
+                )}
+                {selectedHeadset && !permissionsGranted && (
                   <Text style={styles.qplusButtonInfo}>ℹ️ Permissions Required</Text>
                 )}
-                {permissionsGranted && !sdkStatus.isInitialized && (
+                {selectedHeadset && permissionsGranted && !sdkStatus.isInitialized && (
                   <Text style={styles.qplusButtonInfo}>
                     {sdkStatus.isInitializing ? '🔄 Initializing SDK...' : 'ℹ️ SDK Not Ready'}
                   </Text>
                 )}
-                {permissionsGranted && sdkStatus.isInitialized && 
+                {selectedHeadset && permissionsGranted && sdkStatus.isInitialized && 
                  (!serviceStatus.bluetoothEnabled || !serviceStatus.locationEnabled) && (
                   <Text style={styles.qplusButtonInfo}>
                     {!serviceStatus.bluetoothEnabled && !serviceStatus.locationEnabled 
@@ -770,6 +913,12 @@ export const HomeScreen = ({ navigation }: any) => {
                       : !serviceStatus.bluetoothEnabled 
                         ? 'ℹ️ Bluetooth Required' 
                         : 'ℹ️ Location Required'}
+                  </Text>
+                )}
+                {selectedHeadset && permissionsGranted && sdkStatus.isInitialized && 
+                 serviceStatus.bluetoothEnabled && serviceStatus.locationEnabled && (
+                  <Text style={styles.qplusButtonInfo}>
+                    ✅ Ready to connect with {selectedHeadset.name}
                   </Text>
                 )}
               </View>
@@ -1135,6 +1284,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  initButtonDisabled: {
+    backgroundColor: '#ccc',
+    opacity: 0.7,
+  },
+  initButtonTextDisabled: {
+    color: '#666',
+  },
   serviceStatusSection: {
     backgroundColor: '#f8f8f8',
     padding: 20,
@@ -1211,5 +1367,95 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  headsetSection: {
+    backgroundColor: '#f8f8f8',
+    padding: 20,
+    borderRadius: 8,
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  headsetText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 10,
+  },
+  headsetDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+  },
+  headsetDropdownText: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
+  },
+  headsetDropdownPlaceholder: {
+    color: '#888',
+  },
+  headsetDropdownArrow: {
+    fontSize: 16,
+    color: '#666',
+  },
+  selectedHeadsetInfo: {
+    padding: 10,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  selectedHeadsetName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  selectedHeadsetDescription: {
+    fontSize: 14,
+    color: '#666',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    width: '80%',
+    maxHeight: '60%',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  headsetOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headsetOptionSelected: {
+    backgroundColor: '#e0e0e0',
+  },
+  headsetOptionText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  headsetOptionTextSelected: {
+    color: '#007AFF',
+  },
+  headsetOptionDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
+  },
+  headsetOptionDescriptionSelected: {
+    color: '#007AFF',
   },
 }); 

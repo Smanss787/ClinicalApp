@@ -33,10 +33,15 @@ class CyrebroModule(private val reactContext: ReactApplicationContext) : ReactCo
 
     private var buildInfo: String = ""
     @ReactMethod
-    fun innitSDK(promise: Promise) {
+    fun innitSDK(headserId:Int,promise: Promise) {
         try {
-            Log.d("Cyrebro.SDK", "SDK innitSDK called")
-            MBTSDKV3BluetoothManager.setupMbtSdk(reactContext,EnumMBTDevice.Q_PLUS,promise)
+            Log.d("Cyrebro.SDK", "SDK innitSDK called headserId: $headserId")
+            var deviceType = if (headserId == 1) {
+                EnumMBTDevice.MELOMIND
+            } else {
+                EnumMBTDevice.Q_PLUS
+            }
+            MBTSDKV3BluetoothManager.setupMbtSdk(reactContext,deviceType,promise)
         } catch (e: Exception) {
             e.printStackTrace()
             Log.d("Cyrebro.SDK", "Exception e:" + e.message)
