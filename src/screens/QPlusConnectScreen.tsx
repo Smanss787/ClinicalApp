@@ -15,6 +15,9 @@ import {
 import CyrebroSDK from '../../plugins/CyrebroModule';
 import LinearGradient from 'react-native-linear-gradient';
 import { QualityIndicatorVersion2 } from '../helper/QualityIndicatorVersion2'; // adjust path if needed
+import EEGVisualizer from '../components/EEGVisualizer';
+import EEGDataTable from '../components/EEGDataTable';
+import EEGScrollingWaveform from '../components/EEGScrollingWaveform';
 
 interface ScanConfig {
   timeout: number; // in milliseconds
@@ -69,6 +72,7 @@ const QPlusConnectScreen = ({ navigation }: any) => {
   // EEG state
   const [eegRunning, setEegRunning] = useState(false);
   const [eegData, setEegData] = useState<any[]>([]);
+  const [showVisualizations, setShowVisualizations] = useState(true);
 
   // Add state for scores, progress, and the indicator instance
   const [scores, setScores] = useState<number[]>([]);
@@ -552,12 +556,46 @@ const QualityGradientProgressBar = ({ value }: { value: number }) => {
                     <Text style={styles.buttonText}>Stop EEG</Text>
                   </TouchableOpacity>
                 )}
+                
+                {/* Visualization Toggle */}
+                <TouchableOpacity
+                  style={[styles.button, showVisualizations ? styles.primaryButton : styles.secondaryButton]}
+                  onPress={() => setShowVisualizations(!showVisualizations)}
+                >
+                  <Text style={styles.buttonText}>
+                    {showVisualizations ? 'Hide Viz' : 'Show Viz'}
+                  </Text>
+                </TouchableOpacity>
               </View>
               {/* EEG Data Demo */}
               {eegRunning && (
                 <>
                   {/* Show the gradient progress bar for overall quality */}
                   <QualityGradientProgressBar value={progressTotal} />
+                  
+                  {/* EEG Visualizations - Only show if enabled */}
+                  {showVisualizations && (
+                    <>
+                      {/* EEG Visualization */}
+                      <EEGVisualizer 
+                        eegData={eegData} 
+                        isRunning={eegRunning} 
+                      />
+                      
+                      {/* Scrolling EEG Waveform */}
+                      <EEGScrollingWaveform 
+                        eegData={eegData} 
+                        isRunning={eegRunning} 
+                      />
+                      
+                      {/* EEG Data Table */}
+                      <EEGDataTable 
+                        eegData={eegData} 
+                        isRunning={eegRunning} 
+                      />
+                    </>
+                  )}
+                  
                   {eegData.length > 0 && (
                     <View style={styles.eegDataBox}>
                       <Text style={styles.sectionTitle}>Latest EEG Data</Text>

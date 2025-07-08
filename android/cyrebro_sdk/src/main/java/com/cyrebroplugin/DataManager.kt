@@ -5,5 +5,5 @@ object DataManager {
    const val ML_BLE_CONNECTED: String = "BLE device"
    const val ML_BLE_DIS_CONNECTED: String = "BLE_device_disconnected"
    const val ML_BLE_CONNECTED_WITH_DEVICE_INFORMATION: String = "BLE_CONNECTED_WITH_DEVICE_INFORMATION"
-   const val shouldMockingEeg = false
+   const val shouldMockingEeg = true
 }
