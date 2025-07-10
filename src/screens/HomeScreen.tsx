@@ -187,8 +187,14 @@ export const HomeScreen = ({ navigation }: any) => {
       console.log('Initializing Cyrebro SDK...');
       
       // Pass the selected headset ID to the SDK
-      const headsetId = selectedHeadset?.id || null;
-      console.log('Initializing SDK with headset ID:', headsetId);
+      // Convert headset ID to numeric value: melomind = 1, qplus = 2
+      let headsetId = 1; // default to melomind
+      if (selectedHeadset?.id === 'qplus') {
+        headsetId = 2;
+      } else if (selectedHeadset?.id === 'melomind') {
+        headsetId = 1;
+      }
+      console.log('Initializing SDK with headset ID:', headsetId, 'for headset:', selectedHeadset?.name);
       
       const result = await CyrebroSDK.innitSDK(headsetId);
       console.log('CyrebroSDK.initSDK result:', result);
@@ -333,12 +339,12 @@ export const HomeScreen = ({ navigation }: any) => {
     return true; // For iOS, assume enabled
   };
 
-  // Check permissions before navigating to Q-Plus Connect
+  // Check permissions before navigating to the appropriate headset connect screen
   const handleQPlusNavigation = () => {
     if (!selectedHeadset) {
       Alert.alert(
         'Headset Selection Required',
-        'Please select a headset before using Q-Plus Connect.',
+        'Please select a headset before connecting.',
         [{ text: 'OK' }]
       );
       return;
@@ -362,7 +368,7 @@ export const HomeScreen = ({ navigation }: any) => {
       
       Alert.alert(
         'Permissions Required',
-        `The following permissions are required to use Q-Plus Connect:\n\n${missingText}\n\nPlease grant these permissions to continue.`,
+        `The following permissions are required to connect to your headset:\n\n${missingText}\n\nPlease grant these permissions to continue.`,
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Grant Permissions', onPress: checkAndRequestPermissions },
@@ -374,13 +380,13 @@ export const HomeScreen = ({ navigation }: any) => {
       if (sdkStatus.isInitializing) {
         Alert.alert(
           'SDK Initializing',
-          'Please wait for the Cyrebro SDK to finish initializing before using Q-Plus Connect.',
+          'Please wait for the Cyrebro SDK to finish initializing before connecting.',
           [{ text: 'OK' }]
         );
       } else if (sdkStatus.error) {
         Alert.alert(
           'SDK Not Ready',
-          'The Cyrebro SDK failed to initialize. Please retry the initialization before using Q-Plus Connect.',
+          'The Cyrebro SDK failed to initialize. Please retry the initialization before connecting.',
           [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Retry SDK', onPress: initializeSDK }
@@ -407,7 +413,7 @@ export const HomeScreen = ({ navigation }: any) => {
       
       Alert.alert(
         'Services Required',
-        `${missingServicesText} service(s) must be turned ON to use Q-Plus Connect.\n\nPlease enable these services in your device settings.`,
+        `${missingServicesText} service(s) must be turned ON to connect to your headset.\n\nPlease enable these services in your device settings.`,
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Check Services', onPress: checkServices },
@@ -420,12 +426,21 @@ export const HomeScreen = ({ navigation }: any) => {
         checkServices().then(() => {
           if (permissionsGranted && sdkStatus.isInitialized && 
               serviceStatus.bluetoothEnabled && serviceStatus.locationEnabled) {
-            console.log('Navigating to QPlusConnect with headset:', selectedHeadset.name);
-            navigation.navigate('QPlusConnect', { selectedHeadset });
+            console.log('Navigating to headset connect screen with headset:', selectedHeadset.name);
+            
+            // Navigate to the appropriate screen based on headset selection
+            if (selectedHeadset.id === 'melomind') {
+              navigation.navigate('MelomindConnect', { selectedHeadset });
+            } else if (selectedHeadset.id === 'qplus') {
+              navigation.navigate('QPlusConnect', { selectedHeadset });
+            } else {
+              // Fallback to QPlusConnect for unknown headset types
+              navigation.navigate('QPlusConnect', { selectedHeadset });
+            }
           } else {
             Alert.alert(
               'System Check Failed',
-              'Please ensure all permissions are granted, SDK is initialized, and services are enabled before using Q-Plus Connect.',
+              'Please ensure all permissions are granted, SDK is initialized, and services are enabled before connecting.',
               [{ text: 'OK' }]
             );
           }
@@ -718,8 +733,8 @@ export const HomeScreen = ({ navigation }: any) => {
               <Text style={styles.permissionStatusText}>
                 {permissionsGranted && sdkStatus.isInitialized && 
                  serviceStatus.bluetoothEnabled && serviceStatus.locationEnabled
-                  ? '✅ Q-Plus Connect Ready' 
-                  : '⚠️ Q-Plus Connect Setup Required'
+                  ? '✅ Headset Connect Ready' 
+                  : '⚠️ Headset Connect Setup Required'
                 }
               </Text>
               <Text style={styles.permissionStatusSubtext}>
@@ -877,7 +892,7 @@ export const HomeScreen = ({ navigation }: any) => {
               </View>
             )}
 
-            {/* Q-Plus Connect Button */}
+            {/* Headset Connect Button */}
             <TouchableOpacity
               style={[
                 styles.qplusButton,
@@ -892,7 +907,7 @@ export const HomeScreen = ({ navigation }: any) => {
                   (!selectedHeadset || !permissionsGranted || !sdkStatus.isInitialized || 
                    !serviceStatus.bluetoothEnabled || !serviceStatus.locationEnabled) && styles.qplusButtonTextDisabled
                 ]}>
-                  Q-Plus Connect
+                  Connect Headset
                 </Text>
                 {!selectedHeadset && (
                   <Text style={styles.qplusButtonInfo}>ℹ️ Headset Selection Required</Text>

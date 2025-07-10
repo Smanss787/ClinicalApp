@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { TermsScreen } from './screens/TermsScreen';
 import { SignupSuccessScreen } from './screens/SignupSuccessScreen';
 import QPlusConnectScreen from './screens/QPlusConnectScreen';
+import MelomindConnectScreen from './screens/MelomindConnectScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -40,6 +41,7 @@ function Navigation() {
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="QPlusConnect" component={QPlusConnectScreen} />
+        <Stack.Screen name="MelomindConnect" component={MelomindConnectScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
