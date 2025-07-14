@@ -9,8 +9,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TermsScreen } from './screens/TermsScreen';
 import { SignupSuccessScreen } from './screens/SignupSuccessScreen';
-import QPlusConnectScreen from './screens/QPlusConnectScreen';
-import MelomindConnectScreen from './screens/MelomindConnectScreen';
+import HeadsetConnectScreen from './screens/HeadsetConnectScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -40,8 +39,7 @@ function Navigation() {
         <Stack.Screen name="SignupSuccessScreen" component={SignupSuccessScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="QPlusConnect" component={QPlusConnectScreen} />
-        <Stack.Screen name="MelomindConnect" component={MelomindConnectScreen} />
+        <Stack.Screen name="HeadsetConnect" component={HeadsetConnectScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

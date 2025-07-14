@@ -4,9 +4,10 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 interface EEGDataTableProps {
   eegData: any[];
   isRunning: boolean;
+  channelCount?: number; // Optional prop to limit number of channels displayed
 }
 
-const EEGDataTable: React.FC<EEGDataTableProps> = ({ eegData, isRunning }) => {
+const EEGDataTable: React.FC<EEGDataTableProps> = ({ eegData, isRunning, channelCount }) => {
   // Memoized data processing for better performance
   const processedData = useMemo(() => {
     if (!isRunning || eegData.length === 0) {
@@ -39,15 +40,15 @@ const EEGDataTable: React.FC<EEGDataTableProps> = ({ eegData, isRunning }) => {
     if (channelsData.length === 0) return [];
 
     // Show only first 15 samples for better performance
-    const displaySamples = 15;
+    const displaySamples = 10;
     const sampleIndices = Array.from({ length: displaySamples }, (_, i) => i);
 
     return sampleIndices.map(sampleIndex => (
       <View key={sampleIndex} style={styles.dataRow}>
         <Text style={styles.indexCell}>{sampleIndex}</Text>
-        {channelsData.map((channel, channelIndex) => (
+        {channelsData.slice(0, channelCount || channelsData.length).map((channel, channelIndex) => (
           <Text key={channelIndex} style={styles.dataCell}>
-            {channel[sampleIndex] ? channel[sampleIndex].toFixed(1) : 'N/A'}
+            {channel[sampleIndex] ? channel[sampleIndex] : 'N/A'}
           </Text>
         ))}
       </View>
@@ -57,17 +58,18 @@ const EEGDataTable: React.FC<EEGDataTableProps> = ({ eegData, isRunning }) => {
   // Memoized header row
   const headerRow = useMemo(() => {
     const { channelsData } = processedData;
+    const displayChannels = channelCount ? channelsData.slice(0, channelCount) : channelsData;
     return (
       <View style={styles.headerRow}>
         <Text style={styles.headerCell}>Sample</Text>
-        {channelsData.map((_, index) => (
+        {displayChannels.map((_, index) => (
           <Text key={index} style={styles.headerCell}>
             Ch{index + 1}
           </Text>
         ))}
       </View>
     );
-  }, [processedData]);
+  }, [processedData, channelCount]);
 
   if (!isRunning || eegData.length === 0) {
     return (
@@ -86,7 +88,7 @@ const EEGDataTable: React.FC<EEGDataTableProps> = ({ eegData, isRunning }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>EEG Data Table (First 15 samples)</Text>
+      <Text style={styles.title}>EEG Data Table (First 10 samples)</Text>
       
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -103,7 +105,7 @@ const EEGDataTable: React.FC<EEGDataTableProps> = ({ eegData, isRunning }) => {
           Total: {channelsData[0]?.length || 0} samples
         </Text>
         <Text style={styles.summaryText}>
-          Channels: {channelsData.length}
+          Channels: {channelCount ? `${channelCount}/${channelsData.length}` : channelsData.length}
         </Text>
         <Text style={styles.summaryText}>
           Time: {latestPacket?.timestamp || 'N/A'}

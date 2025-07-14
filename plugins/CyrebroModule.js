@@ -4,7 +4,7 @@ const { CyrebroSDK } = NativeModules;
 
 // Enhanced SDK wrapper with headset support
 const CyrebroSDKWrapper = {
-  // Initialize SDK with headset selection
+  // MARK: - SDK Initialization
   innitSDK: (headsetId = null) => {
     console.log('CyrebroSDK.innitSDK called with headsetId:', headsetId);
     
@@ -25,17 +25,31 @@ const CyrebroSDKWrapper = {
     return CyrebroSDK.innitSDK(headsetValue);
   },
 
-  // Forward all other methods to the native module
+  // MARK: - Device Scanning
   scanDevice: () => CyrebroSDK.scanDevice(),
   stopScanDevice: () => CyrebroSDK.stopScanDevice(),
+
+  // MARK: - Device Connection
   connectBLEDevice: (deviceName) => CyrebroSDK.connectBLEDevice(deviceName),
   disconnectBLEDevice: (deviceName) => CyrebroSDK.disconnectBLEDevice(deviceName),
-  connectAudioDevice: (deviceId) => CyrebroSDK.connectAudioDevice(deviceId),
-  disconnectAudioDevice: (deviceId) => CyrebroSDK.disconnectAudioDevice(deviceId),
-  isBluetoothEnabled: () => CyrebroSDK.isBluetoothEnabled(),
-  isLocationEnabled: () => CyrebroSDK.isLocationEnabled(),
+
+  // MARK: - EEG Recording
   startEEGRecording: () => CyrebroSDK.startEEGRecording(),
   stopEEGRecording: () => CyrebroSDK.stopEEGRecording(),
+
+  // MARK: - Mock Data
+  mockEegData: (enable) => CyrebroSDK.mockEegData(enable),
+
+  // MARK: - System Services
+  isBluetoothEnabled: () => CyrebroSDK.isBluetoothEnabled(),
+  isLocationEnabled: () => CyrebroSDK.isLocationEnabled(),
+
+  // MARK: - App Management
+  exitApp: () => CyrebroSDK.exitApp(),
+
+  // MARK: - Audio Device Management
+  connectAudioDevice: (deviceId) => CyrebroSDK.connectAudioDevice(deviceId),
+  disconnectAudioDevice: (deviceId) => CyrebroSDK.disconnectAudioDevice(deviceId),
 };
 
 export default CyrebroSDKWrapper;

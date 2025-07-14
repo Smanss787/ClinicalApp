@@ -20,6 +20,7 @@ import CyrebroSDK from '../../plugins/CyrebroModule';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import AppSettings from 'react-native-app-settings';
 import { useFocusEffect } from '@react-navigation/native';
+import { Int32 } from 'react-native/Libraries/Types/CodegenTypes';
 
 interface Todo {
   id: string;
@@ -60,6 +61,7 @@ export const HomeScreen = ({ navigation }: any) => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState('');
   const [selectedHeadset, setSelectedHeadset] = useState<HeadsetOption | null>(null);
+  const [previousHeadset, setPreviousHeadset] = useState<HeadsetOption | null>(null);
   const [showHeadsetDropdown, setShowHeadsetDropdown] = useState(false);
   const [permissions, setPermissions] = useState<PermissionStatus>({
     bluetooth: 'unavailable',
@@ -194,9 +196,9 @@ export const HomeScreen = ({ navigation }: any) => {
       } else if (selectedHeadset?.id === 'melomind') {
         headsetId = 1;
       }
-      console.log('Initializing SDK with headset ID:', headsetId, 'for headset:', selectedHeadset?.name);
-      
-      const result = await CyrebroSDK.innitSDK(headsetId);
+
+      console.log(`Initializing SDK with headset ID:${headsetId} for headset: ${selectedHeadset?.name}`);
+      const result = await CyrebroSDK.innitSDK(selectedHeadset?.id);
       console.log('CyrebroSDK.initSDK result:', result);
       
       setSdkStatus(prev => ({
@@ -428,15 +430,8 @@ export const HomeScreen = ({ navigation }: any) => {
               serviceStatus.bluetoothEnabled && serviceStatus.locationEnabled) {
             console.log('Navigating to headset connect screen with headset:', selectedHeadset.name);
             
-            // Navigate to the appropriate screen based on headset selection
-            if (selectedHeadset.id === 'melomind') {
-              navigation.navigate('MelomindConnect', { selectedHeadset });
-            } else if (selectedHeadset.id === 'qplus') {
-              navigation.navigate('QPlusConnect', { selectedHeadset });
-            } else {
-              // Fallback to QPlusConnect for unknown headset types
-              navigation.navigate('QPlusConnect', { selectedHeadset });
-            }
+            // Navigate to the unified headset connect screen
+            navigation.navigate('HeadsetConnect', { selectedHeadset });
           } else {
             Alert.alert(
               'System Check Failed',
@@ -548,9 +543,14 @@ export const HomeScreen = ({ navigation }: any) => {
 
   // Headset selection functions
   const handleHeadsetSelection = (headset: HeadsetOption) => {
+    // Store the previous headset before updating
+    if (selectedHeadset) {
+      setPreviousHeadset(selectedHeadset);
+    }
     setSelectedHeadset(headset);
     setShowHeadsetDropdown(false);
-    console.log('Selected headset:', headset.name);
+    console.log('Selected headset name:', headset.name);
+    console.log('Selected headset id:', headset.id);
   };
 
   const toggleHeadsetDropdown = () => {
@@ -787,7 +787,33 @@ export const HomeScreen = ({ navigation }: any) => {
                     </Text>
                     <TouchableOpacity
                       style={styles.reinitButton}
-                      onPress={initializeSDK}
+                      onPress={() => {
+                        // Check if headset was changed
+                        if (previousHeadset && selectedHeadset && previousHeadset.id !== selectedHeadset.id) {
+                          // Headset was changed
+                          Alert.alert(
+                            'Headset Changed',
+                            'Since you changed your headset, please close and reopen the app for the changes to take effect properly.',
+                            [
+                              { 
+                                text: 'OK', 
+                                style: 'default',
+                                onPress: () => {
+                                  // Call exitApp from CyrebroSDK to close the app
+                                  CyrebroSDK.exitApp().then(() => {
+                                    console.log('App exit requested successfully');
+                                  }).catch((error: any) => {
+                                    console.error('Failed to exit app:', error);
+                                  });
+                                }
+                              }
+                            ]
+                          );
+                        } else {
+                          // Same headset or no previous headset
+                          initializeSDK();
+                        }
+                      }}
                     >
                       <Text style={styles.reinitButtonText}>Re-initialize SDK</Text>
                     </TouchableOpacity>
@@ -1217,7 +1243,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   qplusButtonInfo: {
-    color: '#666',
+    color: '#ffffff',
     fontSize: 12,
     marginTop: 2,
     fontStyle: 'italic',

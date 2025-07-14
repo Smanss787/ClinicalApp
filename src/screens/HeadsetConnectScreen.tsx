@@ -10,14 +10,13 @@ import {
   ScrollView,
   Alert,
   NativeEventEmitter,
-  NativeModules
+  NativeModules,
+  Switch
 } from 'react-native';
 import CyrebroSDK from '../../plugins/CyrebroModule';
 import LinearGradient from 'react-native-linear-gradient';
-import { QualityIndicatorVersion2 } from '../helper/QualityIndicatorVersion2'; // adjust path if needed
-import EEGVisualizer from '../components/EEGVisualizer';
+import { QualityIndicatorVersion2 } from '../helper/QualityIndicatorVersion2';
 import EEGDataTable from '../components/EEGDataTable';
-import EEGScrollingWaveform from '../components/EEGScrollingWaveform';
 
 interface ScanConfig {
   timeout: number; // in milliseconds
@@ -50,10 +49,25 @@ interface BleDeviceState {
   deviceStatus?: DeviceStatus;
 }
 
-const QPlusConnectScreen = ({ navigation }: any) => {
+interface HeadsetConnectScreenProps {
+  navigation: any;
+  route: {
+    params: {
+      selectedHeadset: {
+        id: string;
+        name: string;
+        description: string;
+      };
+    };
+  };
+}
+
+const HeadsetConnectScreen = ({ navigation, route }: any) => {
+  const { selectedHeadset } = route.params;
+  
   // Configuration state
   const [scanConfig, setScanConfig] = useState<ScanConfig>({
-    timeout: 20000, // 10 seconds default
+    timeout: 20000, // 20 seconds default
     autoStop: true,
   });
 
@@ -69,23 +83,31 @@ const QPlusConnectScreen = ({ navigation }: any) => {
   const [bleDisconnecting, setBleDisconnecting] = useState(false);
   const [bleDevice, setBleDevice] = useState<BleDeviceState | null>(null);
   const [audioDevice, setAudioDevice] = useState<any | null>(null);
+  
   // EEG state
   const [eegRunning, setEegRunning] = useState(false);
   const [eegData, setEegData] = useState<any[]>([]);
   const [showVisualizations, setShowVisualizations] = useState(true);
+  const [mockDataEnabled, setMockDataEnabled] = useState(false);
 
   // Add state for scores, progress, and the indicator instance
   const [scores, setScores] = useState<number[]>([]);
   const [progressTotal, setProgressTotal] = useState<number>(2);
   const [qualityIndicator] = useState(() => new QualityIndicatorVersion2());
-  const channelNb = 2; // or 4, depending on your device/model
+  const channelNb = selectedHeadset.id === 'melomind' ? 2 : 4; // Melomind uses 2 channels, QPlus uses 4 channels
   const [barWidth, setBarWidth] = useState(0);
+
+  // Headset-specific configurations
+  const headsetConfig = {
+    title: selectedHeadset.name + ' Connect',
+    showAudioConnect: selectedHeadset.id === 'melomind', // Only Melomind shows audio connect
+    channelCount: selectedHeadset.id === 'melomind' ? 2 : 4, // Melomind uses 2 channels, QPlus uses 4 channels
+  };
 
   useEffect(() => {
     const { CyrebroSDK } = NativeModules;
     const eegEmitter = new NativeEventEmitter(CyrebroSDK);
     const subscription = eegEmitter.addListener('onEEGPacket', (data) => {
-      // console.log('EEG event received:', data);
       console.log('EEG event qualities:', data.qualities);
       setEegData(prev => [...prev.slice(-19), data]); // keep last 20 packets
       // Update quality scores and progress bar with new EEG data
@@ -138,7 +160,7 @@ const QPlusConnectScreen = ({ navigation }: any) => {
         { 
           id: Date.now().toString(), 
           name: deviceInfoMap[0],
-          bondState:deviceInfoMap[2],
+          bondState: deviceInfoMap[2],
           address: deviceInfoMap[1] 
         }
       ]);
@@ -261,20 +283,7 @@ const QPlusConnectScreen = ({ navigation }: any) => {
     });
   };
 
-  // Connect AUDIO
-  const handleConnectAudio = () => {
-    if (!selectedBleDevice) return;
-    setAudioConnecting(true);
-    
-    setTimeout(() => {
-      setAudioDevice({
-        name: selectedBleDevice.name,
-        status: 'Connected',
-      });
-      setAudioConnecting(false);
-      Alert.alert('Success', 'Audio device connected successfully!');
-    }, 2000);
-  };
+
 
   // EEG Handlers
   const handleStartEEG = () => {
@@ -313,51 +322,51 @@ const QPlusConnectScreen = ({ navigation }: any) => {
   );
 
   /**
- * Gradient progress bar component for visualizing overall quality.
- * @param value number (0-100)
- */
-const QualityGradientProgressBar = ({ value }: { value: number }) => {
-  console.log('[QualityGradientProgressBar] value:', value);
-  return (
-    <View style={{ width: '100%', alignItems: 'center', marginVertical: 16 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', width: '90%' }}>
-        <Text style={{ color: '#888', marginRight: 8 }}>Low</Text>
-        <View
-          style={{ flex: 1, height: 16, justifyContent: 'center', position: 'relative' }}
-          onLayout={e => setBarWidth(e.nativeEvent.layout.width)}
-        >
-          <LinearGradient
-            colors={['#FE3C30', '#FE9502', '#35C56F']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ position: 'absolute', left: 0, right: 0, height: 8, borderRadius: 4 }}
-          />
-          {/* Thumb */}
+   * Gradient progress bar component for visualizing overall quality.
+   * @param value number (0-100)
+   */
+  const QualityGradientProgressBar = ({ value }: { value: number }) => {
+    console.log('[QualityGradientProgressBar] value:', value);
+    return (
+      <View style={{ width: '100%', alignItems: 'center', marginVertical: 16 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '90%' }}>
+          <Text style={{ color: '#888', marginRight: 8 }}>Low</Text>
           <View
-            style={{
-              position: 'absolute',
-              left: barWidth ? (value / 100) * barWidth - 9 : 0,
-              top: -5,
-              width: 18,
-              height: 18,
-              borderRadius: 9,
-              backgroundColor: '#fff',
-              borderWidth: 2,
-              borderColor: '#35C56F',
-              zIndex: 2,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.2,
-              shadowRadius: 1.41,
-              elevation: 2,
-            }}
-          />
+            style={{ flex: 1, height: 16, justifyContent: 'center', position: 'relative' }}
+            onLayout={e => setBarWidth(e.nativeEvent.layout.width)}
+          >
+            <LinearGradient
+              colors={['#FE3C30', '#FE9502', '#35C56F']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ position: 'absolute', left: 0, right: 0, height: 8, borderRadius: 4 }}
+            />
+            {/* Thumb */}
+            <View
+              style={{
+                position: 'absolute',
+                left: barWidth ? (value / 100) * barWidth - 9 : 0,
+                top: -5,
+                width: 18,
+                height: 18,
+                borderRadius: 9,
+                backgroundColor: '#fff',
+                borderWidth: 2,
+                borderColor: '#35C56F',
+                zIndex: 2,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.2,
+                shadowRadius: 1.41,
+                elevation: 2,
+              }}
+            />
+          </View>
+          <Text style={{ color: '#888', marginLeft: 8 }}>High</Text>
         </View>
-        <Text style={{ color: '#888', marginLeft: 8 }}>High</Text>
       </View>
-    </View>
-  );
-};
+    );
+  };
 
   const isIndus5 = () => {
     // TODO: Replace with your real check
@@ -394,9 +403,20 @@ const QualityGradientProgressBar = ({ value }: { value: number }) => {
     }
   };
 
+  // Mock data toggle handler
+  const handleMockDataToggle = (value: boolean) => {
+    setMockDataEnabled(value);
+    CyrebroSDK.mockEegData(value).then(() => {
+      console.log(`Mock EEG data ${value ? 'enabled' : 'disabled'}`);
+    }).catch((error: any) => {
+      console.error('Failed to toggle mock EEG data:', error);
+      Alert.alert('Error', 'Failed to toggle mock EEG data. Please try again.');
+    });
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Text style={styles.title}>Q-Plus Connect</Text>
+      <Text style={styles.title}>{headsetConfig.title}</Text>
       
       {/* Configuration Section */}
       <View style={styles.configSection}>
@@ -409,7 +429,7 @@ const QualityGradientProgressBar = ({ value }: { value: number }) => {
             value={(scanConfig.timeout / 1000).toString()}
             onChangeText={updateScanTimeout}
             keyboardType="numeric"
-            placeholder="10"
+            placeholder="20"
             editable={!scanning}
           />
         </View>
@@ -496,24 +516,13 @@ const QualityGradientProgressBar = ({ value }: { value: number }) => {
                 onPress={handleDisconnectBLE} 
                 disabled={bleDisconnecting}
               >
-                <Text style={styles.buttonText}>
+                <Text style={styles.buttonText} numberOfLines={1}>
                   {bleDisconnecting ? 'Disconnecting...' : 'Disconnect BLE'}
                 </Text>
               </TouchableOpacity>
             )}
             
-            {/* Audio Connect button - only show when BLE is connected */}
-            {bleDevice && !audioDevice && (
-              <TouchableOpacity 
-                style={[styles.button, styles.primaryButton]} 
-                onPress={handleConnectAudio} 
-                disabled={audioConnecting}
-              >
-                <Text style={styles.buttonText}>
-                  {audioConnecting ? 'Connecting...' : 'Connect Audio'}
-                </Text>
-              </TouchableOpacity>
-            )}
+           
           </View>
         </View>
       )}
@@ -539,33 +548,48 @@ const QualityGradientProgressBar = ({ value }: { value: number }) => {
                   <Text style={styles.deviceUID}>UID: {bleDevice.deviceStatus.deviceInformation.uniqueDeviceIdentifier}</Text>
                 </>
               )}
+              {/* Mock Data Toggle */}
+              <View style={styles.mockDataSection}>
+                <Text style={styles.mockDataLabel}>Mock EEG Data</Text>
+                <Switch
+                  value={mockDataEnabled}
+                  onValueChange={handleMockDataToggle}
+                  trackColor={{ false: '#767577', true: '#81b0ff' }}
+                  thumbColor={mockDataEnabled ? '#007AFF' : '#f4f3f4'}
+                />
+              </View>
+
               {/* EEG Buttons */}
               <View style={styles.eegButtonRow}>
-                {!eegRunning ? (
-                  <TouchableOpacity
-                    style={[styles.button, styles.primaryButton]}
-                    onPress={handleStartEEG}
-                  >
-                    <Text style={styles.buttonText}>Start EEG</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    style={[styles.button, styles.secondaryButton]}
-                    onPress={handleStopEEG}
-                  >
-                    <Text style={styles.buttonText}>Stop EEG</Text>
-                  </TouchableOpacity>
-                )}
+                <View style={styles.eegButtonContainer}>
+                  {!eegRunning ? (
+                    <TouchableOpacity
+                      style={[styles.button, styles.primaryButton]}
+                      onPress={handleStartEEG}
+                    >
+                      <Text style={styles.buttonText}>Start EEG</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={[styles.button, styles.secondaryButton]}
+                      onPress={handleStopEEG}
+                    >
+                      <Text style={styles.buttonText}>Stop EEG</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
                 
-                {/* Visualization Toggle */}
-                <TouchableOpacity
-                  style={[styles.button, showVisualizations ? styles.primaryButton : styles.secondaryButton]}
-                  onPress={() => setShowVisualizations(!showVisualizations)}
-                >
-                  <Text style={styles.buttonText}>
-                    {showVisualizations ? 'Hide Viz' : 'Show Viz'}
-                  </Text>
-                </TouchableOpacity>
+                <View style={styles.eegButtonContainer}>
+                  {/* Visualization Toggle */}
+                  <TouchableOpacity
+                    style={[styles.button, showVisualizations ? styles.primaryButton : styles.secondaryButton]}
+                    onPress={() => setShowVisualizations(!showVisualizations)}
+                  >
+                    <Text style={styles.buttonText}>
+                      {showVisualizations ? 'Hide Table' : 'Show Table'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
               {/* EEG Data Demo */}
               {eegRunning && (
@@ -576,22 +600,11 @@ const QualityGradientProgressBar = ({ value }: { value: number }) => {
                   {/* EEG Visualizations - Only show if enabled */}
                   {showVisualizations && (
                     <>
-                      {/* EEG Visualization */}
-                      <EEGVisualizer 
-                        eegData={eegData} 
-                        isRunning={eegRunning} 
-                      />
-                      
-                      {/* Scrolling EEG Waveform */}
-                      <EEGScrollingWaveform 
-                        eegData={eegData} 
-                        isRunning={eegRunning} 
-                      />
-                      
-                      {/* EEG Data Table */}
+                      {/* EEG Data Table - Available for all headsets */}
                       <EEGDataTable 
                         eegData={eegData} 
                         isRunning={eegRunning} 
+                        channelCount={headsetConfig.channelCount}
                       />
                     </>
                   )}
@@ -645,8 +658,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 10,
-    width: 150,
+    minWidth: 150,
+    minHeight: 50,
   },
   primaryButton: {
     backgroundColor: '#007AFF',
@@ -656,8 +671,9 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   loader: {
     marginBottom: 10,
@@ -835,9 +851,29 @@ const styles = StyleSheet.create({
   },
   eegButtonRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     marginTop: 10,
     marginBottom: 10,
+    width: '100%',
+  },
+  eegButtonContainer: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  mockDataSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f0f4f8',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+    width: '100%',
+  },
+  mockDataLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
   },
   eegDataBox: {
     backgroundColor: '#f9f9f9',
@@ -853,4 +889,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default QPlusConnectScreen;
+export default HeadsetConnectScreen; 

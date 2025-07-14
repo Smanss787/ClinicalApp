@@ -48,6 +48,8 @@ object MBTSDKV3BluetoothManager {
     var firmwareVersion: String? = null
     var audioConnected: Boolean = false
 
+    var mDeviceType: EnumMBTDevice? = null
+
     private var filterMode = EnumEEGFilterConfig.NO_FILTER
     private val deviceInformationListener: DeviceInformationListener by lazy { createDeviceInformationListener() }
     private var connectionListener: ConnectionListener? = null
@@ -67,10 +69,11 @@ object MBTSDKV3BluetoothManager {
     fun setupMbtSdk(context: Context, deviceType: EnumMBTDevice,promiss: Promise) {
         TNLog.d(TAG, " setupMbtSdk sdkInnit:${sdkInnit}")
         if (!sdkInnit) {
-
+            mDeviceType = deviceType
             TNLog.d(TAG, "[setupMbtSdk] start setupMbtSdk")
             var useDeviceType = deviceType
 
+            TNLog.d(TAG, "[setupMbtSdk] start setupMbtSdk useDeviceTypeL:${useDeviceType}")
             audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             if (mbtClient == null) {
@@ -352,24 +355,33 @@ object MBTSDKV3BluetoothManager {
             var processedPackage = mbtEEGPacket
             val shouldMockEeg = DataManager.shouldMockingEeg
             if (shouldMockEeg) {
+
+                val sampleData = if (mDeviceType == EnumMBTDevice.MELOMIND) {
+                    SampleData.eegSampleMelomind
+                } else {
+                    SampleData.eegSample
+                }
                 val newEEG1: MbtEEGPacket =
-                    Gson().fromJson(SampleData.eegSample, MbtEEGPacket::class.java)
+                    Gson().fromJson(sampleData, MbtEEGPacket::class.java)
                 val channelData = jsonArrayStringToArrayOfFloatArray(SampleData.channelData)
                 for (i in 0..249) {
                     val selectedIndex = (0..7499).random()
                     newEEG1.channelsData[0][i] = channelData[0][selectedIndex]
                     val selectedIndex2 = (0..7499).random()
                     newEEG1.channelsData[1][i] = channelData[1][selectedIndex2]
-                    val selectedIndex3 = (0..7499).random()
-                    newEEG1.channelsData[2][i] = channelData[2][selectedIndex3]
-                    val selectedIndex4 = (0..7499).random()
-                    newEEG1.channelsData[3][i] = channelData[3][selectedIndex4]
+                    if (mDeviceType == EnumMBTDevice.Q_PLUS) {
+                        val selectedIndex3 = (0..7499).random()
+                        newEEG1.channelsData[2][i] = channelData[2][selectedIndex3]
+                        val selectedIndex4 = (0..7499).random()
+                        newEEG1.channelsData[3][i] = channelData[3][selectedIndex4]
+                    }
 
                 }
                 processedPackage = newEEG1
             }
 
-//            TNLog.d(TAG, "sdk eeg listener on eeg packages:" + usingEegListener)
+            TNLog.d(TAG, "sdk eeg listener on eeg processedPackage chanels:${processedPackage.channelsData.size}" )
+            TNLog.d(TAG, "sdk eeg listener on eeg processedPackage qualties:${processedPackage.qualities}" )
             usingEegListener?.onEegPacket(processedPackage)
         }
     }

@@ -48,7 +48,6 @@ export class QualityIndicatorVersion2 {
   }
 
   addNext(qualities: Array<number>) {
-    console.log('[QualityIndicatorVersion2] addNext qualities:', qualities);
     this.qualityBuffer.push(qualities);
     while (this.qualityBuffer.length > QualityIndicatorVersion2.SLIDING_WINDOW_SIZE) {
       this.qualityBuffer.shift();
@@ -63,9 +62,7 @@ export class QualityIndicatorVersion2 {
     for (let ch = 0; ch < nbChannels; ch++) {
       let channelScore = this.scores[ch];
       let qualitiesPoint = qualities[ch];
-      console.log(`[QualityIndicatorVersion2] Channel ${ch} qualitiesPoint:`, qualitiesPoint);
       const rawPoint = this.getPoint(qualitiesPoint);
-     console.log(`[QualityIndicatorVersion2] Channel ${ch} rawPoint:`, rawPoint);
     
       let computation: number;
       if (rawPoint > 0) {
@@ -96,7 +93,6 @@ export class QualityIndicatorVersion2 {
   }
 
   private getPoint(quality: number): number {
-    console.log('[QualityIndicatorVersion2] getPoint quality:', quality);
     if (quality === 1.0) return 100;
     if (quality === 0.5) return 50;
     if (quality === 0.0) return -100;
