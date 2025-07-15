@@ -13,6 +13,10 @@ import {
   FlatList,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { EyeIcon } from '../components/EyeIcon';
+import { BackButton } from '../components/BackButton';
+import { commonStyles, COLORS } from '../constants/styles';
 
 interface RegisterFormData {
   email: string;
@@ -22,15 +26,8 @@ interface RegisterFormData {
   gender: string;
 }
 
-const GENDER_OPTIONS = [
-  { label: 'Male', value: 'male' },
-  { label: 'Female', value: 'female' },
-  { label: 'Other', value: 'other' },
-  { label: 'Rather not say', value: 'na' },
-];
-
 export const RegisterScreen = ({ navigation }: any) => {
-  // const { register } = useAuth();
+  const { t, getGenderOptions } = useLanguage();
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
@@ -42,31 +39,34 @@ export const RegisterScreen = ({ navigation }: any) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [genderModalVisible, setGenderModalVisible] = useState(false);
+  const [genderFieldPosition, setGenderFieldPosition] = useState({ y: 0 });
+
+  const GENDER_OPTIONS = getGenderOptions();
 
   const validateForm = () => {
     const newErrors: Partial<RegisterFormData> = {};
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('auth.emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = t('auth.validEmail');
     }
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('auth.passwordRequired');
     } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(formData.password)) {
-      newErrors.password = 'Password does not meet requirements';
+      newErrors.password = t('auth.passwordRequirementsError');
     }
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirm your password';
+      newErrors.confirmPassword = t('auth.confirmPasswordRequired');
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('auth.passwordsDoNotMatch');
     }
     if (!formData.age.trim()) {
-      newErrors.age = 'Age is required';
+      newErrors.age = t('auth.ageRequired');
     } else if (!/^\d+$/.test(formData.age) || parseInt(formData.age) < 1) {
-      newErrors.age = 'Enter a valid age';
+      newErrors.age = t('auth.validAge');
     }
     if (!formData.gender.trim()) {
-      newErrors.gender = 'Gender is required';
+      newErrors.gender = t('auth.genderRequired');
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -101,24 +101,23 @@ export const RegisterScreen = ({ navigation }: any) => {
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         {/* Top bar with back arrow */}
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backArrow}>{'<'}</Text>
-          </TouchableOpacity>
+          <BackButton onPress={() => navigation.goBack()} />
         </View>
-        <Text style={styles.title}>Create your account</Text>
+        <Text style={styles.title}>{t('auth.createAccount')}</Text>
         <View style={styles.dot} />
 
         {/* Email */}
         <View style={styles.inputContainer}>
           <TextInput
             style={[styles.input, errors.email && styles.inputError]}
-            placeholder="What's your email?"
-            placeholderTextColor="#1a2a36"
+            placeholder={t('auth.emailPlaceholder')}
+            placeholderTextColor={COLORS.primary}
             keyboardType="email-address"
             autoCapitalize="none"
             value={formData.email}
             onChangeText={(text) => setFormData({ ...formData, email: text })}
           />
+          {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
         </View>
 
         {/* Password */}
@@ -126,16 +125,17 @@ export const RegisterScreen = ({ navigation }: any) => {
           <View style={styles.inputRow}>
             <TextInput
               style={[styles.input, { flex: 1 }, errors.password && styles.inputError]}
-              placeholder="Choose your password"
-              placeholderTextColor="#1a2a36"
+              placeholder={t('auth.choosePasswordPlaceholder')}
+              placeholderTextColor={COLORS.primary}
               secureTextEntry={!showPassword}
               value={formData.password}
               onChangeText={(text) => setFormData({ ...formData, password: text })}
             />
             <TouchableOpacity onPress={() => setShowPassword((v) => !v)} style={styles.eyeButton}>
-              <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
+              <EyeIcon showPassword={showPassword} size={20} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
+          {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
         </View>
 
         {/* Confirm Password */}
@@ -143,21 +143,22 @@ export const RegisterScreen = ({ navigation }: any) => {
           <View style={styles.inputRow}>
             <TextInput
               style={[styles.input, { flex: 1 }, errors.confirmPassword && styles.inputError]}
-              placeholder="Confirm your password"
-              placeholderTextColor="#1a2a36"
+              placeholder={t('auth.confirmPasswordPlaceholder')}
+              placeholderTextColor={COLORS.primary}
               secureTextEntry={!showConfirmPassword}
               value={formData.confirmPassword}
               onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
             />
             <TouchableOpacity onPress={() => setShowConfirmPassword((v) => !v)} style={styles.eyeButton}>
-              <Text style={styles.eyeIcon}>{showConfirmPassword ? '🙈' : '👁️'}</Text>
+              <EyeIcon showPassword={showConfirmPassword} size={20} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
+          {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
         </View>
 
         {/* Password requirements */}
         <Text style={styles.passwordRequirements}>
-          Your password must contain at least 8 characters, one upper case, one lower case and one number.
+          {t('auth.passwordRequirements')}
         </Text>
 
         {/* Age and Gender */}
@@ -166,13 +167,14 @@ export const RegisterScreen = ({ navigation }: any) => {
             <Text style={styles.icon}>🎁</Text>
             <TextInput
               style={[styles.input, styles.iconInput, errors.age && styles.inputError]}
-              placeholder="Age"
-              placeholderTextColor="#1a2a36"
+              placeholder={t('auth.agePlaceholder')}
+              placeholderTextColor={COLORS.primary}
               keyboardType="numeric"
               value={formData.age}
               onChangeText={(text) => setFormData({ ...formData, age: text })}
               maxLength={3}
             />
+            {errors.age && <Text style={styles.errorText}>{errors.age}</Text>}
           </View>
           <View style={styles.iconInputContainer}>
             <Text style={styles.icon}>⚥</Text>
@@ -180,9 +182,13 @@ export const RegisterScreen = ({ navigation }: any) => {
               style={[styles.input, styles.iconInput, styles.genderDropdown, errors.gender && styles.inputError]}
               onPress={() => setGenderModalVisible(true)}
               activeOpacity={0.7}
+              onLayout={(event) => {
+                const { y } = event.nativeEvent.layout;
+                setGenderFieldPosition({ y });
+              }}
             >
-              <Text style={{ color: formData.gender ? '#1a2a36' : '#aaa', fontSize: 16 }}>
-                {formData.gender ? GENDER_OPTIONS.find(opt => opt.value === formData.gender)?.label : 'Gender'}
+              <Text style={{ color: formData.gender ? COLORS.primary : COLORS.lightGray, fontSize: 16 }}>
+                {formData.gender ? GENDER_OPTIONS.find(opt => opt.value === formData.gender)?.label : t('auth.genderPlaceholder')}
               </Text>
             </TouchableOpacity>
             <Modal
@@ -192,7 +198,7 @@ export const RegisterScreen = ({ navigation }: any) => {
               onRequestClose={() => setGenderModalVisible(false)}
             >
               <Pressable style={styles.modalOverlay} onPress={() => setGenderModalVisible(false)}>
-                <View style={styles.modalContent}>
+                <View style={[styles.modalContent, { marginTop: genderFieldPosition.y + 170 }]}>
                   <FlatList
                     data={GENDER_OPTIONS}
                     keyExtractor={(item) => item.value}
@@ -211,6 +217,7 @@ export const RegisterScreen = ({ navigation }: any) => {
                 </View>
               </Pressable>
             </Modal>
+            {errors.gender && <Text style={styles.errorText}>{errors.gender}</Text>}
           </View>
         </View>
 
@@ -220,7 +227,7 @@ export const RegisterScreen = ({ navigation }: any) => {
           onPress={handleNext}
           disabled={!allValid()}
         >
-          <Text style={styles.buttonText}>Next</Text>
+          <Text style={styles.buttonText}>{t('common.next')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -229,15 +236,10 @@ export const RegisterScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    ...commonStyles.container,
   },
   scrollContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 40,
-    backgroundColor: '#fff',
+    ...commonStyles.scrollContainer,
   },
   topBar: {
     flexDirection: 'row',
@@ -245,61 +247,32 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   backButton: {
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  backArrow: {
-    fontSize: 28,
-    color: '#1a2a36',
-    fontWeight: '300',
+    ...commonStyles.backButton,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1a2a36',
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 10,
+    ...commonStyles.title,
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#1a2a36',
-    alignSelf: 'center',
-    marginBottom: 30,
+    ...commonStyles.dot,
   },
   inputContainer: {
-    marginBottom: 18,
+    ...commonStyles.inputContainer,
   },
   input: {
-    borderBottomWidth: 1.5,
-    borderColor: '#1a2a36',
-    borderRadius: 0,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: '#1a2a36',
-    backgroundColor: 'transparent',
+    ...commonStyles.input,
   },
   inputError: {
-    borderColor: 'red',
+    ...commonStyles.inputError,
   },
   inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    ...commonStyles.inputRow,
   },
   eyeButton: {
-    padding: 8,
-  },
-  eyeIcon: {
-    fontSize: 20,
-    color: '#1a2a36',
+    ...commonStyles.eyeButton,
   },
   passwordRequirements: {
     fontSize: 13,
-    color: '#1a2a36',
+    color: COLORS.primary,
     opacity: 0.7,
     marginBottom: 24,
     textAlign: 'left',
@@ -318,59 +291,44 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 22,
     marginRight: 8,
-    color: '#1a2a36',
+    color: COLORS.primary,
   },
   iconInput: {
     flex: 1,
   },
   button: {
-    borderWidth: 1.5,
-    borderColor: '#1a2a36',
-    backgroundColor: 'transparent',
-    paddingVertical: 16,
-    borderRadius: 4,
-    alignItems: 'center',
-    marginBottom: 10,
+    ...commonStyles.button,
   },
   buttonDisabled: {
-    opacity: 0.5,
+    ...commonStyles.buttonDisabled,
   },
   buttonText: {
-    color: '#1a2a36',
-    fontSize: 18,
-    fontWeight: '400',
+    ...commonStyles.buttonText,
   },
   genderDropdown: {
     justifyContent: 'center',
     height: 40,
     borderBottomWidth: 1.5,
-    borderColor: '#1a2a36',
+    borderColor: COLORS.primary,
     backgroundColor: 'transparent',
     paddingVertical: 0,
     paddingHorizontal: 0,
   },
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    ...commonStyles.modalOverlay,
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    minWidth: 150,
-    elevation: 5,
-    marginTop: 120,
-    maxHeight: 200,
+    ...commonStyles.modalContent,
   },
   genderOption: {
-    paddingVertical: 12,
-    alignItems: 'center',
+    ...commonStyles.modalOption,
   },
   genderOptionText: {
-    fontSize: 16,
-    color: '#1a2a36',
+    ...commonStyles.modalOptionText,
+  },
+  errorText: {
+    color: COLORS.red,
+    fontSize: 12,
+    marginTop: 5,
   },
 }); 

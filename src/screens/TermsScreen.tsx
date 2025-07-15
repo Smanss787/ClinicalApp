@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator, Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { BackButton } from '../components/BackButton';
+import { commonStyles, COLORS } from '../constants/styles';
 
 export const TermsScreen = ({ navigation, route }: any) => {
   const { formData } = route.params;
@@ -37,9 +39,7 @@ export const TermsScreen = ({ navigation, route }: any) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backArrow}>{'<'}</Text>
-      </TouchableOpacity>
+      <BackButton onPress={() => navigation.goBack()} style={styles.backButton} />
       <Text style={styles.title}>Create your account</Text>
       <View style={styles.dot} />
       <Text style={styles.instruction}>
@@ -92,45 +92,23 @@ export const TermsScreen = ({ navigation, route }: any) => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     padding: 24,
     paddingTop: 40,
     alignItems: 'stretch',
   },
   backButton: {
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
+    ...commonStyles.backButton,
     marginBottom: 10,
-  },
-  backArrow: {
-    fontSize: 28,
-    color: '#1a2a36',
-    fontWeight: '300',
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1a2a36',
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 10,
+    ...commonStyles.title,
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#1a2a36',
-    alignSelf: 'center',
-    marginBottom: 30,
+    ...commonStyles.dot,
   },
   instruction: {
-    fontSize: 16,
-    color: '#1a2a36',
-    opacity: 0.7,
-    textAlign: 'center',
-    marginBottom: 30,
+    ...commonStyles.instruction,
   },
   checkboxRow: {
     flexDirection: 'row',
@@ -146,40 +124,31 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderWidth: 1.5,
-    borderColor: '#1a2a36',
+    borderColor: COLORS.primary,
     borderRadius: 4,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
   },
   checkboxChecked: {
-    backgroundColor: '#1a2a36',
+    backgroundColor: COLORS.primary,
   },
   checkboxLabel: {
     fontSize: 16,
-    color: '#1a2a36',
+    color: COLORS.primary,
     flex: 1,
     flexWrap: 'wrap',
     textAlign: 'left',
   },
   link: {
-    color: '#1a2a36',
-    textDecorationLine: 'underline',
-    fontWeight: 'bold',
+    ...commonStyles.link,
   },
   button: {
-    borderWidth: 1.5,
-    borderColor: '#1a2a36',
-    backgroundColor: 'transparent',
-    paddingVertical: 16,
-    borderRadius: 4,
-    alignItems: 'center',
+    ...commonStyles.button,
     marginTop: 30,
   },
   buttonDisabled: {
-    opacity: 0.5,
+    ...commonStyles.buttonDisabled,
   },
   buttonText: {
-    color: '#1a2a36',
-    fontSize: 18,
-    fontWeight: '400',
+    ...commonStyles.buttonText,
   },
 }); 

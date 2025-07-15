@@ -54,29 +54,29 @@ import kotlin.math.sin
  */
 object CyrebroSDKImpl {
 
-    companion object {
+
         /** Tag for logging purposes */
-        const val TAG = "CyrebroSDKImpl"
+         val TAG = "CyrebroSDKImpl"
         
         // EEG Data Configuration
-        private const val EEG_PACKET_SIZE = 250
-        private const val CHANNEL_DATA_SIZE = 7500
-        private const val MELOMIND_CHANNELS = 2
-        private const val QPLUS_CHANNELS = 4
+        private  val EEG_PACKET_SIZE = 250
+        private  val CHANNEL_DATA_SIZE = 7500
+        private  val MELOMIND_CHANNELS = 2
+        private  val QPLUS_CHANNELS = 4
         
         // BLE Configuration
-        private const val SCAN_TIMEOUT_MS = 30000L
-        private const val CONNECTION_TIMEOUT_MS = 10000L
-        private const val RECONNECT_DELAY_MS = 2000L
-        private const val MAX_RECONNECT_ATTEMPTS = 3
+        private  val SCAN_TIMEOUT_MS = 30000L
+        private  val CONNECTION_TIMEOUT_MS = 10000L
+        private  val RECONNECT_DELAY_MS = 2000L
+        private  val MAX_RECONNECT_ATTEMPTS = 3
         
         // Logging Tags
-        private const val LOG_TAG_SETUP = "[Setup]"
-        private const val LOG_TAG_SCAN = "[Scan]"
-        private const val LOG_TAG_CONNECTION = "[Connection]"
-        private const val LOG_TAG_EEG = "[EEG]"
-        private const val LOG_TAG_AUDIO = "[Audio]"
-    }
+        private  val LOG_TAG_SETUP = "[Setup]"
+        private  val LOG_TAG_SCAN = "[Scan]"
+        private  val LOG_TAG_CONNECTION = "[Connection]"
+        private  val LOG_TAG_EEG = "[EEG]"
+        private  val LOG_TAG_AUDIO = "[Audio]"
+
 
     /** MyBrainTech client instance for SDK operations */
     var mbtClient: MbtClient? = null

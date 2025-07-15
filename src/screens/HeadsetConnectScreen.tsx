@@ -17,6 +17,7 @@ import CyrebroSDK from '../../plugins/CyrebroModule';
 import LinearGradient from 'react-native-linear-gradient';
 import { QualityIndicatorVersion2 } from '../helper/QualityIndicatorVersion2';
 import EEGDataTable from '../components/EEGDataTable';
+import { BackButton } from '../components/BackButton';
 
 interface ScanConfig {
   timeout: number; // in milliseconds
@@ -632,9 +633,10 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
         </View>
       )}
 
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <View style={styles.backButtonContainer}>
+        <BackButton onPress={() => navigation.goBack()} />
         <Text style={styles.backButtonText}>Back to Home</Text>
-      </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -732,9 +734,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
   },
+  backButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    padding: 10,
+  },
   backButtonText: {
     color: '#007AFF',
     fontSize: 16,
+    marginLeft: 8,
   },
   configSection: {
     width: '100%',

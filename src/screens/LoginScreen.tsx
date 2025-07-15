@@ -15,40 +15,41 @@ import {
   FlatList,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { EyeIcon } from '../components/EyeIcon';
+import { commonStyles, COLORS } from '../constants/styles';
 
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-const LANGUAGES = [
-  { label: 'English', value: 'en' },
-  { label: 'French', value: 'fr' },
-];
-
 export const LoginScreen = ({ navigation }: any) => {
   const { login } = useAuth();
+  const { t, getAvailableLanguages, setLanguage, currentLanguage } = useLanguage();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<LoginFormData>>({});
-  const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGES[0]);
   const [modalVisible, setModalVisible] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const LANGUAGES = getAvailableLanguages();
+  const selectedLanguage = LANGUAGES.find(lang => lang.value === currentLanguage) || LANGUAGES[0];
 
   const validateForm = () => {
     const newErrors: Partial<LoginFormData> = {};
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('auth.emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = t('auth.validEmail');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('auth.passwordRequired');
     }
 
     setErrors(newErrors);
@@ -63,13 +64,18 @@ export const LoginScreen = ({ navigation }: any) => {
         navigation.replace('Home');
       } catch (error: any) {
         Alert.alert(
-          'Login Failed',
-          error.message || 'An error occurred during login. Please try again.'
+          t('auth.loginFailed'),
+          error.message || t('auth.loginError')
         );
       } finally {
         setIsLoading(false);
       }
     }
+  };
+
+  const handleLanguageChange = (language: { label: string; value: string }) => {
+    setLanguage(language.value as any);
+    setModalVisible(false);
   };
 
   return (
@@ -96,10 +102,7 @@ export const LoginScreen = ({ navigation }: any) => {
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     style={styles.languageOption}
-                    onPress={() => {
-                      setSelectedLanguage(item);
-                      setModalVisible(false);
-                    }}
+                    onPress={() => handleLanguageChange(item)}
                   >
                     <Text style={styles.languageOptionText}>{item.label}</Text>
                   </TouchableOpacity>
@@ -112,7 +115,6 @@ export const LoginScreen = ({ navigation }: any) => {
 
       {/* Logo and App Name */}
       <View style={styles.logoContainer}>
-        {/* Replace with your logo image if available */}
         <View style={styles.logoPlaceholder} />
         <Text style={styles.logoText}>corMed</Text>
         <View style={styles.dot} />
@@ -122,8 +124,8 @@ export const LoginScreen = ({ navigation }: any) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={[styles.input, errors.email && styles.inputError]}
-            placeholder="What's your email?"
-            placeholderTextColor="#1a2a36"
+            placeholder={t('auth.emailPlaceholder')}
+            placeholderTextColor={COLORS.primary}
             keyboardType="email-address"
             autoCapitalize="none"
             value={formData.email}
@@ -137,15 +139,15 @@ export const LoginScreen = ({ navigation }: any) => {
           <View style={styles.inputRow}>
             <TextInput
               style={[styles.input, errors.password && styles.inputError, { flex: 1 }]}
-              placeholder="What's your password ?"
-              placeholderTextColor="#1a2a36"
+              placeholder={t('auth.passwordPlaceholder')}
+              placeholderTextColor={COLORS.primary}
               secureTextEntry={!showPassword}
               value={formData.password}
               onChangeText={(text) => setFormData({ ...formData, password: text })}
               editable={!isLoading}
             />
             <TouchableOpacity onPress={() => setShowPassword((v) => !v)} style={styles.eyeButton}>
-              <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
+              <EyeIcon showPassword={showPassword} size={20} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
           {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
@@ -156,7 +158,7 @@ export const LoginScreen = ({ navigation }: any) => {
           onPress={() => navigation.navigate('ForgotPassword')}
           disabled={isLoading}
         >
-          <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
+          <Text style={styles.forgotPasswordText}>{t('auth.forgotPassword')}</Text>
         </TouchableOpacity>
 
         <View style={styles.buttonBottomContainer}>
@@ -166,19 +168,19 @@ export const LoginScreen = ({ navigation }: any) => {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color="#1a2a36" />
+              <ActivityIndicator color={COLORS.primary} />
             ) : (
-              <Text style={styles.buttonText}>Log in</Text>
+              <Text style={styles.buttonText}>{t('auth.login')}</Text>
             )}
           </TouchableOpacity>
 
           <View style={styles.bottomTextContainer}>
-            <Text style={styles.bottomText}>No account yet ? </Text>
+            <Text style={styles.bottomText}>{t('auth.noAccountYet')} </Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('Register')}
               disabled={isLoading}
             >
-              <Text style={styles.signUpText}>Sign up</Text>
+              <Text style={styles.signUpText}>{t('auth.signUp')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -189,8 +191,7 @@ export const LoginScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    ...commonStyles.container,
     justifyContent: 'flex-start',
   },
   languageSelectorContainer: {
@@ -199,33 +200,23 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   languageSelectorText: {
-    color: '#1a2a36',
-    fontSize: 14,
-    opacity: 0.7,
+    ...commonStyles.languageSelectorText,
   },
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    ...commonStyles.modalOverlay,
     justifyContent: 'flex-start',
-    alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    minWidth: 150,
-    elevation: 5,
+    ...commonStyles.modalContent,
     marginTop: 60,
-    maxHeight: 120,
+    maxHeight: 100,
   },
   languageOption: {
     paddingVertical: 10,
     alignItems: 'center',
   },
   languageOptionText: {
-    fontSize: 16,
-    color: '#1a2a36',
+    ...commonStyles.modalOptionText,
   },
   logoContainer: {
     alignItems: 'center',
@@ -237,22 +228,18 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 35,
     borderWidth: 2,
-    borderColor: '#1a2a36',
+    borderColor: COLORS.primary,
     marginBottom: 10,
-    // You can replace this with an Image component for your logo
   },
   logoText: {
     fontSize: 32,
     fontWeight: '400',
-    color: '#1a2a36',
+    color: COLORS.primary,
     fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
     marginBottom: 10,
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#1a2a36',
+    ...commonStyles.dot,
     marginBottom: 20,
   },
   formContainer: {
@@ -262,57 +249,43 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   inputContainer: {
-    marginBottom: 18,
+    ...commonStyles.inputContainer,
   },
   input: {
-    borderBottomWidth: 1.5,
-    borderColor: '#1a2a36',
-    borderRadius: 0,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: '#1a2a36',
-    backgroundColor: 'transparent',
+    ...commonStyles.input,
   },
   inputError: {
-    borderColor: 'red',
+    ...commonStyles.inputError,
   },
   errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 5,
+    ...commonStyles.errorText,
   },
   forgotPassword: {
     alignSelf: 'flex-start',
     marginBottom: 30,
   },
   forgotPasswordText: {
-    color: '#1a2a36',
+    color: COLORS.primary,
     fontSize: 13,
     textDecorationLine: 'underline',
     opacity: 0.8,
   },
   button: {
-    borderWidth: 1.5,
-    borderColor: '#1a2a36',
-    backgroundColor: 'transparent',
-    paddingVertical: 16,
-    borderRadius: 4,
-    alignItems: 'center',
+    ...commonStyles.button,
     width: '50%',
     alignSelf: 'center',
     marginTop: 30,
     marginBottom: 0,
+    minHeight: 50,
   },
   buttonCenter: {
-    alignSelf: 'center',
+    ...commonStyles.buttonCenter,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
-    color: '#1a2a36',
-    fontSize: 18,
-    fontWeight: '400',
+    ...commonStyles.buttonText,
   },
   bottomTextContainer: {
     flexDirection: 'row',
@@ -322,32 +295,27 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   bottomText: {
-    color: '#1a2a36',
+    color: COLORS.primary,
     fontSize: 14,
     opacity: 0.7,
   },
   signUpText: {
-    color: '#1a2a36',
+    color: COLORS.primary,
     fontSize: 14,
     fontWeight: 'bold',
     textDecorationLine: 'underline',
     marginLeft: 2,
   },
   inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    ...commonStyles.inputRow,
   },
   eyeButton: {
-    padding: 8,
-  },
-  eyeIcon: {
-    fontSize: 20,
-    color: '#1a2a36',
+    ...commonStyles.eyeButton,
   },
   buttonBottomContainer: {
-    flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',
     marginTop: 40,
+    minHeight: 120,
   },
 }); 

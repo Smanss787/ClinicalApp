@@ -15,6 +15,8 @@ import {
   Linking,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { BackButton } from '../components/BackButton';
+import { commonStyles, COLORS } from '../constants/styles';
 
 interface ForgotPasswordFormData {
   email: string;
@@ -81,9 +83,7 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
     >
       {/* Top bar with back arrow and language dropdown */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backArrow}>{'<'}</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} />
         <View style={styles.languageSelectorContainer}>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Text style={styles.languageSelectorText}>{selectedLanguage.label} ▼</Text>
@@ -171,50 +171,26 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    ...commonStyles.container,
   },
   topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 50 : 24,
-    marginBottom: 10,
+    ...commonStyles.topBar,
   },
   backButton: {
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  backArrow: {
-    fontSize: 28,
-    color: '#1a2a36',
-    fontWeight: '300',
+    ...commonStyles.backButton,
   },
   languageSelectorContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    ...commonStyles.languageSelectorContainer,
   },
   languageSelectorText: {
-    color: '#1a2a36',
-    fontSize: 14,
-    opacity: 0.7,
+    ...commonStyles.languageSelectorText,
   },
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    ...commonStyles.modalOverlay,
     justifyContent: 'flex-start',
-    alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    minWidth: 150,
-    elevation: 5,
+    ...commonStyles.modalContent,
     marginTop: 60,
     maxHeight: 120,
   },
@@ -223,8 +199,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   languageOptionText: {
-    fontSize: 16,
-    color: '#1a2a36',
+    ...commonStyles.modalOptionText,
   },
   contentContainer: {
     flex: 1,
@@ -232,76 +207,48 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a2a36',
-    textAlign: 'center',
-    marginTop: 30,
-    marginBottom: 10,
+    ...commonStyles.titleLarge,
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#1a2a36',
-    alignSelf: 'center',
+    ...commonStyles.dot,
     marginBottom: 24,
   },
   instructions: {
-    fontSize: 18,
-    color: '#1a2a36',
-    textAlign: 'left',
-    marginBottom: 40,
-    lineHeight: 24,
+    ...commonStyles.instructionLeft,
   },
   inputContainer: {
     marginBottom: 40,
   },
   input: {
-    borderBottomWidth: 1.5,
-    borderColor: '#1a2a36',
-    borderRadius: 0,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: '#1a2a36',
-    backgroundColor: 'transparent',
+    ...commonStyles.input,
   },
   inputError: {
-    borderColor: 'red',
+    ...commonStyles.inputError,
   },
   errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 5,
+    ...commonStyles.errorText,
   },
   supportContainer: {
     marginBottom: 40,
   },
   supportText: {
     fontSize: 15,
-    color: '#1a2a36',
+    color: COLORS.primary,
     marginBottom: 2,
   },
   supportEmail: {
-    color: '#1a2a36',
+    color: COLORS.primary,
     fontSize: 15,
     textDecorationLine: 'underline',
   },
   button: {
-    borderWidth: 1.5,
-    borderColor: '#1a2a36',
-    backgroundColor: 'transparent',
-    paddingVertical: 16,
-    borderRadius: 4,
-    alignItems: 'center',
+    ...commonStyles.button,
     marginBottom: 30,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
-    color: '#1a2a36',
-    fontSize: 18,
-    fontWeight: '400',
+    ...commonStyles.buttonText,
   },
 }); 

@@ -7,9 +7,11 @@ import { LoginScreen } from './screens/LoginScreen';
 import { ForgotPasswordScreen } from './screens/ForgotPasswordScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { TermsScreen } from './screens/TermsScreen';
 import { SignupSuccessScreen } from './screens/SignupSuccessScreen';
 import HeadsetConnectScreen from './screens/HeadsetConnectScreen';
+import { COLORS } from './constants/styles';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,7 +22,7 @@ function Navigation() {
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
-        <ActivityIndicator size="large" color="#1a2a36" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -47,9 +49,11 @@ function Navigation() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Navigation />
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <Navigation />
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 

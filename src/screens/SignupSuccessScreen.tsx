@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator, A
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { commonStyles, COLORS } from '../constants/styles';
 
 export const SignupSuccessScreen = () => {
   const route = useRoute();
@@ -55,30 +56,20 @@ export const SignupSuccessScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     padding: 24,
     paddingTop: 40,
     alignItems: 'center',
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1a2a36',
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 10,
+    ...commonStyles.title,
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#1a2a36',
-    alignSelf: 'center',
-    marginBottom: 30,
+    ...commonStyles.dot,
   },
   successText: {
     fontSize: 16,
-    color: '#1a2a36',
+    color: COLORS.primary,
     textAlign: 'left',
     marginBottom: 40,
     width: '100%',
@@ -90,33 +81,25 @@ const styles = StyleSheet.create({
   },
   thumbIcon: {
     fontSize: 64,
-    color: '#1a2a36',
+    color: COLORS.primary,
     textAlign: 'center',
   },
   infoText: {
     fontSize: 15,
-    color: '#1a2a36',
+    color: COLORS.primary,
     textAlign: 'left',
     marginBottom: 40,
     width: '100%',
   },
   link: {
-    color: '#1a2a36',
-    textDecorationLine: 'underline',
+    ...commonStyles.link,
   },
   button: {
-    borderWidth: 1.5,
-    borderColor: '#1a2a36',
-    backgroundColor: 'transparent',
-    paddingVertical: 16,
-    borderRadius: 4,
-    alignItems: 'center',
+    ...commonStyles.button,
     width: '80%',
     alignSelf: 'center',
   },
   buttonText: {
-    color: '#1a2a36',
-    fontSize: 18,
-    fontWeight: '400',
+    ...commonStyles.buttonText,
   },
 }); 
