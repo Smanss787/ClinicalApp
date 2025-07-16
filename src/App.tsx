@@ -11,6 +11,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { TermsScreen } from './screens/TermsScreen';
 import { SignupSuccessScreen } from './screens/SignupSuccessScreen';
 import HeadsetConnectScreen from './screens/HeadsetConnectScreen';
+import HeadsetAdjustmentScreen from './screens/HeadsetAdjustmentScreen';
 import { COLORS } from './constants/styles';
 
 const Stack = createNativeStackNavigator();
@@ -42,6 +43,7 @@ function Navigation() {
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="HeadsetConnect" component={HeadsetConnectScreen} />
+        <Stack.Screen name="HeadsetAdjustment" component={HeadsetAdjustmentScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -14,7 +14,6 @@ import {
   Switch
 } from 'react-native';
 import CyrebroSDK from '../../plugins/CyrebroModule';
-import LinearGradient from 'react-native-linear-gradient';
 import { QualityIndicatorVersion2 } from '../helper/QualityIndicatorVersion2';
 import EEGDataTable from '../components/EEGDataTable';
 import { BackButton } from '../components/BackButton';
@@ -91,12 +90,9 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
   const [showVisualizations, setShowVisualizations] = useState(true);
   const [mockDataEnabled, setMockDataEnabled] = useState(false);
 
-  // Add state for scores, progress, and the indicator instance
-  const [scores, setScores] = useState<number[]>([]);
-  const [progressTotal, setProgressTotal] = useState<number>(2);
+  // Quality indicator for potential future use
   const [qualityIndicator] = useState(() => new QualityIndicatorVersion2());
   const channelNb = selectedHeadset.id === 'melomind' ? 2 : 4; // Melomind uses 2 channels, QPlus uses 4 channels
-  const [barWidth, setBarWidth] = useState(0);
 
   // Headset-specific configurations
   const headsetConfig = {
@@ -307,6 +303,28 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
     });
   };
 
+  const handleStartAdjustment = () => {
+    // Navigate to Headset Adjustment screen
+    navigation.navigate('HeadsetAdjustment', {
+      headsetConfig: {
+        id: selectedHeadset.id,
+        name: selectedHeadset.name,
+        title: selectedHeadset.name + ' Adjustment',
+        channelCount: headsetConfig.channelCount,
+      },
+    });
+  };
+
+  const updateQualityButtonsAndProgressBar = (qualities?: number[]) => {
+    if (qualities) {
+      qualityIndicator.addNext(qualities);
+    } else {
+      qualityIndicator.addNext([0, 0]);
+    }
+  };
+
+
+
   const renderBleDevice = ({ item }: { item: BleDevice }) => (
     <TouchableOpacity
       style={[styles.deviceItem, selectedBleDevice?.id === item.id && styles.selectedDeviceItem]}
@@ -322,98 +340,7 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
     </TouchableOpacity>
   );
 
-  /**
-   * Gradient progress bar component for visualizing overall quality.
-   * @param value number (0-100)
-   */
-  const QualityGradientProgressBar = ({ value }: { value: number }) => {
-    console.log('[QualityGradientProgressBar] value:', value);
-    return (
-      <View style={{ width: '100%', alignItems: 'center', marginVertical: 16 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', width: '90%' }}>
-          <Text style={{ color: '#888', marginRight: 8 }}>Low</Text>
-          <View
-            style={{ flex: 1, height: 16, justifyContent: 'center', position: 'relative' }}
-            onLayout={e => setBarWidth(e.nativeEvent.layout.width)}
-          >
-            <LinearGradient
-              colors={['#FE3C30', '#FE9502', '#35C56F']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ position: 'absolute', left: 0, right: 0, height: 8, borderRadius: 4 }}
-            />
-            {/* Thumb */}
-            <View
-              style={{
-                position: 'absolute',
-                left: barWidth ? (value / 100) * barWidth - 9 : 0,
-                top: -5,
-                width: 18,
-                height: 18,
-                borderRadius: 9,
-                backgroundColor: '#fff',
-                borderWidth: 2,
-                borderColor: '#35C56F',
-                zIndex: 2,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.2,
-                shadowRadius: 1.41,
-                elevation: 2,
-              }}
-            />
-          </View>
-          <Text style={{ color: '#888', marginLeft: 8 }}>High</Text>
-        </View>
-      </View>
-    );
-  };
 
-  const isIndus5 = () => {
-    // TODO: Replace with your real check
-    return false;
-  };
-
-  const isSignalGoodEnough = (scoreTotal: number) => {
-    return qualityIndicator.isSignalGoodEnough(scoreTotal, channelNb);
-  };
-
-  const updateQualityButtonsAndProgressBar = (qualities?: number[]) => {
-    if (qualities) {
-      qualityIndicator.addNext(qualities);
-    } else {
-      if (isIndus5()) {
-        qualityIndicator.addNext([0, 0, 0, 0]);
-      } else {
-        qualityIndicator.addNext([0, 0]);
-      }
-    }
-    const newScores = qualityIndicator.getScores();
-    setScores(newScores);
-
-    let scoreTotal = newScores.reduce((sum: number, s: number) => sum + s, 0);
-    let progress = (scoreTotal / (QualityIndicatorVersion2.MAX_SCORE * channelNb)) * 100;
-    if (progress < 2) progress = 2;
-    else if (progress > 98) progress = 98;
-    setProgressTotal(progress);
-
-    if (isSignalGoodEnough(scoreTotal)) {
-      // handle show quality is good enough
-    } else {
-      // handle quality still not good enough
-    }
-  };
-
-  // Mock data toggle handler
-  const handleMockDataToggle = (value: boolean) => {
-    setMockDataEnabled(value);
-    CyrebroSDK.mockEegData(value).then(() => {
-      console.log(`Mock EEG data ${value ? 'enabled' : 'disabled'}`);
-    }).catch((error: any) => {
-      console.error('Failed to toggle mock EEG data:', error);
-      Alert.alert('Error', 'Failed to toggle mock EEG data. Please try again.');
-    });
-  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -549,16 +476,7 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
                   <Text style={styles.deviceUID}>UID: {bleDevice.deviceStatus.deviceInformation.uniqueDeviceIdentifier}</Text>
                 </>
               )}
-              {/* Mock Data Toggle */}
-              <View style={styles.mockDataSection}>
-                <Text style={styles.mockDataLabel}>Mock EEG Data</Text>
-                <Switch
-                  value={mockDataEnabled}
-                  onValueChange={handleMockDataToggle}
-                  trackColor={{ false: '#767577', true: '#81b0ff' }}
-                  thumbColor={mockDataEnabled ? '#007AFF' : '#f4f3f4'}
-                />
-              </View>
+
 
               {/* EEG Buttons */}
               <View style={styles.eegButtonRow}>
@@ -592,12 +510,41 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
                   </TouchableOpacity>
                 </View>
               </View>
-              {/* EEG Data Demo */}
+
+              {/* Headset Adjustment Button */}
+              <View style={styles.eegButtonRow}>
+                <View style={styles.eegButtonContainer}>
+                  <TouchableOpacity
+                    style={[styles.button, styles.primaryButton]}
+                    onPress={handleStartAdjustment}
+                  >
+                    <Text style={styles.buttonText}>Start Headset Adjustment</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Mock Data Toggle */}
+              <View style={styles.mockDataSection}>
+                <Text style={styles.mockDataLabel}>Mock EEG Data</Text>
+                <Switch
+                  value={mockDataEnabled}
+                  onValueChange={(value) => {
+                    setMockDataEnabled(value);
+                    CyrebroSDK.mockEegData(value).then(() => {
+                      console.log(`Mock EEG data ${value ? 'enabled' : 'disabled'}`);
+                    }).catch((error: any) => {
+                      console.error('Failed to toggle mock EEG data:', error);
+                      Alert.alert('Error', 'Failed to toggle mock EEG data. Please try again.');
+                    });
+                  }}
+                  trackColor={{ false: '#767577', true: '#81b0ff' }}
+                  thumbColor={mockDataEnabled ? '#007AFF' : '#f4f3f4'}
+                />
+              </View>
+
+              {/* EEG Data Display */}
               {eegRunning && (
                 <>
-                  {/* Show the gradient progress bar for overall quality */}
-                  <QualityGradientProgressBar value={progressTotal} />
-                  
                   {/* EEG Visualizations - Only show if enabled */}
                   {showVisualizations && (
                     <>
