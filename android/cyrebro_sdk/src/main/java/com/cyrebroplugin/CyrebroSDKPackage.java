@@ -19,7 +19,10 @@ public class CyrebroSDKPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         CyrebroSDKPackage.CyrebroModule = new CyrebroModule(reactContext);
-        return Arrays.<NativeModule>asList(CyrebroSDKPackage.CyrebroModule);
+        return Arrays.<NativeModule>asList(
+            CyrebroSDKPackage.CyrebroModule,
+            new LSLModule(reactContext)
+        );
     }
 
     @Override

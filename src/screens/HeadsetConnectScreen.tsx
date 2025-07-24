@@ -17,6 +17,7 @@ import CyrebroSDK from '../../plugins/CyrebroModule';
 import { QualityIndicatorVersion2 } from '../helper/QualityIndicatorVersion2';
 import EEGDataTable from '../components/EEGDataTable';
 import { BackButton } from '../components/BackButton';
+import lslService, { EEGSample } from '../services/lslService';
 
 interface ScanConfig {
   timeout: number; // in milliseconds
@@ -90,6 +91,13 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
   const [showVisualizations, setShowVisualizations] = useState(true);
   const [mockDataEnabled, setMockDataEnabled] = useState(false);
 
+  // LSL state
+  const [lslEnabled, setLslEnabled] = useState(false);
+  const [lslConnected, setLslConnected] = useState(false);
+  const [lslStreaming, setLslStreaming] = useState(false);
+  const [lslServerAddress, setLslServerAddress] = useState('localhost');
+  const [lslServerPort, setLslServerPort] = useState('16571');
+
   // Quality indicator for potential future use
   const [qualityIndicator] = useState(() => new QualityIndicatorVersion2());
   const channelNb = selectedHeadset.id === 'melomind' ? 2 : 4; // Melomind uses 2 channels, QPlus uses 4 channels
@@ -109,11 +117,23 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
       setEegData(prev => [...prev.slice(-19), data]); // keep last 20 packets
       // Update quality scores and progress bar with new EEG data
       updateQualityButtonsAndProgressBar(data.qualities);
+      
+      // Stream to LSL if enabled and connected
+      if (lslEnabled && lslStreaming) {
+        const eegSample: EEGSample = {
+          timestamp: Date.now(),
+          channels: data.channels || [],
+          qualities: data.qualities || []
+        };
+        lslService.pushEEGSample(eegSample).catch(error => {
+          console.error('Failed to push EEG sample to LSL:', error);
+        });
+      }
     });
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [lslEnabled, lslStreaming]);
 
   // Configuration handlers
   const updateScanTimeout = (timeout: string) => {
@@ -320,6 +340,105 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
       qualityIndicator.addNext(qualities);
     } else {
       qualityIndicator.addNext([0, 0]);
+    }
+  };
+
+  // LSL Handlers
+  const handleInitializeLSL = async () => {
+    try {
+      const port = parseInt(lslServerPort) || 16571;
+      const success = await lslService.initialize({
+        serverAddress: lslServerAddress,
+        port: port
+      });
+      
+      if (success) {
+        setLslConnected(true);
+        Alert.alert('LSL Connected', 'Successfully connected to LSL server.');
+      } else {
+        Alert.alert('LSL Connection Failed', 'Failed to connect to LSL server.');
+      }
+    } catch (error) {
+      console.error('LSL initialization error:', error);
+      Alert.alert('LSL Error', `Failed to initialize LSL: ${error}`);
+    }
+  };
+
+  const handleCreateLSLOutlets = async () => {
+    try {
+      if (!lslConnected) {
+        Alert.alert('LSL Not Connected', 'Please connect to LSL server first.');
+        return;
+      }
+
+      // Create EEG outlet
+      await lslService.createEEGOutlet(headsetConfig.channelCount, 250);
+      
+      // Create quality outlet
+      await lslService.createQualityOutlet(headsetConfig.channelCount, 10);
+      
+      // Create event outlet
+      await lslService.createEventOutlet();
+      
+      Alert.alert('LSL Outlets Created', 'EEG, Quality, and Event outlets created successfully.');
+    } catch (error) {
+      console.error('Failed to create LSL outlets:', error);
+      Alert.alert('LSL Error', `Failed to create outlets: ${error}`);
+    }
+  };
+
+  const handleStartLSLStreaming = async () => {
+    try {
+      const success = await lslService.startStreaming();
+      if (success) {
+        setLslStreaming(true);
+        Alert.alert('LSL Streaming Started', 'EEG data is now being streamed to LSL.');
+      } else {
+        Alert.alert('LSL Streaming Failed', 'Failed to start LSL streaming.');
+      }
+    } catch (error) {
+      console.error('Failed to start LSL streaming:', error);
+      Alert.alert('LSL Error', `Failed to start streaming: ${error}`);
+    }
+  };
+
+  const handleStopLSLStreaming = async () => {
+    try {
+      const success = await lslService.stopStreaming();
+      if (success) {
+        setLslStreaming(false);
+        Alert.alert('LSL Streaming Stopped', 'EEG data streaming has been stopped.');
+      } else {
+        Alert.alert('LSL Streaming Failed', 'Failed to stop LSL streaming.');
+      }
+    } catch (error) {
+      console.error('Failed to stop LSL streaming:', error);
+      Alert.alert('LSL Error', `Failed to stop streaming: ${error}`);
+    }
+  };
+
+  const handleCloseLSL = async () => {
+    try {
+      await lslService.close();
+      setLslConnected(false);
+      setLslStreaming(false);
+      setLslEnabled(false);
+      Alert.alert('LSL Closed', 'LSL connection has been closed.');
+    } catch (error) {
+      console.error('Failed to close LSL:', error);
+      Alert.alert('LSL Error', `Failed to close LSL: ${error}`);
+    }
+  };
+
+  const handlePushLSLEvent = async (eventType: string) => {
+    try {
+      await lslService.pushEvent(eventType, {
+        headset: selectedHeadset.name,
+        timestamp: Date.now()
+      });
+      console.log(`LSL event pushed: ${eventType}`);
+    } catch (error) {
+      console.error('Failed to push LSL event:', error);
     }
   };
 
@@ -540,6 +659,139 @@ const HeadsetConnectScreen = ({ navigation, route }: any) => {
                   trackColor={{ false: '#767577', true: '#81b0ff' }}
                   thumbColor={mockDataEnabled ? '#007AFF' : '#f4f3f4'}
                 />
+              </View>
+
+              {/* LSL Configuration Section */}
+              <View style={styles.lslSection}>
+                <Text style={styles.sectionTitle}>LSL (Lab Streaming Layer)</Text>
+                
+                {/* LSL Enable Toggle */}
+                <View style={styles.lslToggleSection}>
+                  <Text style={styles.lslToggleLabel}>Enable LSL Streaming</Text>
+                  <Switch
+                    value={lslEnabled}
+                    onValueChange={(value) => {
+                      setLslEnabled(value);
+                      if (!value) {
+                        // Disable LSL when toggle is turned off
+                        handleCloseLSL();
+                      }
+                    }}
+                    trackColor={{ false: '#767577', true: '#81b0ff' }}
+                    thumbColor={lslEnabled ? '#007AFF' : '#f4f3f4'}
+                  />
+                </View>
+
+                {lslEnabled && (
+                  <>
+                    {/* LSL Server Configuration */}
+                    <View style={styles.lslConfigSection}>
+                      <Text style={styles.lslConfigLabel}>Server Address:</Text>
+                      <TextInput
+                        style={styles.lslConfigInput}
+                        value={lslServerAddress}
+                        onChangeText={setLslServerAddress}
+                        placeholder="localhost"
+                        editable={!lslConnected}
+                      />
+                    </View>
+                    
+                    <View style={styles.lslConfigSection}>
+                      <Text style={styles.lslConfigLabel}>Port:</Text>
+                      <TextInput
+                        style={styles.lslConfigInput}
+                        value={lslServerPort}
+                        onChangeText={setLslServerPort}
+                        placeholder="16571"
+                        keyboardType="numeric"
+                        editable={!lslConnected}
+                      />
+                    </View>
+
+                    {/* LSL Connection Controls */}
+                    <View style={styles.lslButtonRow}>
+                      {!lslConnected ? (
+                        <TouchableOpacity
+                          style={[styles.button, styles.primaryButton]}
+                          onPress={handleInitializeLSL}
+                        >
+                          <Text style={styles.buttonText}>Connect to LSL</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          style={[styles.button, styles.secondaryButton]}
+                          onPress={handleCloseLSL}
+                        >
+                          <Text style={styles.buttonText}>Disconnect LSL</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    {/* LSL Outlet Management */}
+                    {lslConnected && (
+                      <View style={styles.lslOutletSection}>
+                        <TouchableOpacity
+                          style={[styles.button, styles.primaryButton]}
+                          onPress={handleCreateLSLOutlets}
+                        >
+                          <Text style={styles.buttonText}>Create LSL Outlets</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {/* LSL Streaming Controls */}
+                    {lslConnected && (
+                      <View style={styles.lslStreamingSection}>
+                        {!lslStreaming ? (
+                          <TouchableOpacity
+                            style={[styles.button, styles.primaryButton]}
+                            onPress={handleStartLSLStreaming}
+                          >
+                            <Text style={styles.buttonText}>Start LSL Streaming</Text>
+                          </TouchableOpacity>
+                        ) : (
+                          <TouchableOpacity
+                            style={[styles.button, styles.secondaryButton]}
+                            onPress={handleStopLSLStreaming}
+                          >
+                            <Text style={styles.buttonText}>Stop LSL Streaming</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    )}
+
+                    {/* LSL Status */}
+                    <View style={styles.lslStatusSection}>
+                      <Text style={styles.lslStatusText}>
+                        Status: {lslConnected ? 'Connected' : 'Disconnected'}
+                      </Text>
+                      <Text style={styles.lslStatusText}>
+                        Streaming: {lslStreaming ? 'Active' : 'Inactive'}
+                      </Text>
+                    </View>
+
+                    {/* LSL Event Buttons */}
+                    {lslStreaming && (
+                      <View style={styles.lslEventSection}>
+                        <Text style={styles.lslEventLabel}>Push Events:</Text>
+                        <View style={styles.lslEventButtonRow}>
+                          <TouchableOpacity
+                            style={[styles.button, styles.primaryButton, styles.smallButton]}
+                            onPress={() => handlePushLSLEvent('session_start')}
+                          >
+                            <Text style={styles.buttonText}>Session Start</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.button, styles.primaryButton, styles.smallButton]}
+                            onPress={() => handlePushLSLEvent('session_end')}
+                          >
+                            <Text style={styles.buttonText}>Session End</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    )}
+                  </>
+                )}
               </View>
 
               {/* EEG Data Display */}
@@ -842,6 +1094,86 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#333',
     fontFamily: 'monospace',
+  },
+  // LSL Styles
+  lslSection: {
+    width: '100%',
+    marginBottom: 20,
+    backgroundColor: '#f8f9fa',
+    padding: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  lslToggleSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  lslToggleLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  lslConfigSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  lslConfigLabel: {
+    width: 120,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  lslConfigInput: {
+    flex: 1,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    fontSize: 14,
+  },
+  lslButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  lslOutletSection: {
+    marginBottom: 10,
+  },
+  lslStreamingSection: {
+    marginBottom: 10,
+  },
+  lslStatusSection: {
+    backgroundColor: '#e9ecef',
+    padding: 10,
+    borderRadius: 4,
+    marginBottom: 10,
+  },
+  lslStatusText: {
+    fontSize: 14,
+    color: '#495057',
+    marginBottom: 2,
+  },
+  lslEventSection: {
+    marginBottom: 10,
+  },
+  lslEventLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  lslEventButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  smallButton: {
+    minWidth: 120,
+    padding: 12,
+    minHeight: 40,
   },
 });
 
