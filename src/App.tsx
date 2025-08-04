@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar, useColorScheme, View, ActivityIndicator } from 'react-native';
+import codePush from '@revopush/react-native-code-push';
 import { RegisterScreen } from './screens/RegisterScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { ForgotPasswordScreen } from './screens/ForgotPasswordScreen';
@@ -59,4 +60,20 @@ function App() {
   );
 }
 
-export default App;
+// RevoPush CodePush configuration
+const codePushOptions = {
+  checkFrequency: codePush.CheckFrequency.ON_APP_START,
+  // Update dialog options
+  updateDialog: {
+    title: "An update is available!",
+    mandatoryUpdateMessage: "A mandatory update is available.",
+    mandatoryContinueButtonLabel: "Update",
+    optionalUpdateMessage: "An update is available. Would you like to install it?",
+    optionalIgnoreButtonLabel: "Later",
+    optionalInstallButtonLabel: "Install",
+  },
+  // Install mode options
+  installMode: codePush.InstallMode.IMMEDIATE,
+};
+
+export default codePush(codePushOptions)(App);
