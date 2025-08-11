@@ -3,46 +3,18 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		03F22B960D3D19E4C3BA9BC1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		0C80B921A6F3F58F76C31292 /* libPods-clinicalApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-clinicalApp.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		60E17A422E1826D6004814E1 /* MyBrainTechnologiesSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 60754F9E2E18263F00EE79C6 /* MyBrainTechnologiesSDK.framework */; };
-		60E17A432E1826D6004814E1 /* MyBrainTechnologiesSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 60754F9E2E18263F00EE79C6 /* MyBrainTechnologiesSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		60E17A452E1826D7004814E1 /* Realm.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 60754F9F2E18263F00EE79C6 /* Realm.xcframework */; };
-		60E17A462E1826D7004814E1 /* Realm.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 60754F9F2E18263F00EE79C6 /* Realm.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		60E17A472E1826D8004814E1 /* RealmSwift.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 60754FA02E18263F00EE79C6 /* RealmSwift.xcframework */; };
-		60E17A482E1826D8004814E1 /* RealmSwift.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 60754FA02E18263F00EE79C6 /* RealmSwift.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		60E17A492E1826D9004814E1 /* SwiftyBeaver.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 60754FA12E18263F00EE79C6 /* SwiftyBeaver.xcframework */; };
-		60E17A4A2E1826D9004814E1 /* SwiftyBeaver.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 60754FA12E18263F00EE79C6 /* SwiftyBeaver.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		60E17A4B2E1826DB004814E1 /* SwiftyJSON.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 60754FA22E18263F00EE79C6 /* SwiftyJSON.xcframework */; };
-		60E17A4C2E1826DB004814E1 /* SwiftyJSON.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 60754FA22E18263F00EE79C6 /* SwiftyJSON.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		60E17A572E182B67004814E1 /* CyrebroSDKModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60E17A562E182B67004814E1 /* CyrebroSDKModule.swift */; };
-		60E17A5A2E182BAA004814E1 /* CyrebroSDKModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 60E17A592E182BAA004814E1 /* CyrebroSDKModule.m */; };
+		60FFA3982E43529E00BCDB17 /* CyrebroModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60FFA3972E43529E00BCDB17 /* CyrebroModule.swift */; };
+		60FFA39B2E43529E00BCDB1A /* LSLModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60FFA39A2E43529E00BCDB19 /* LSLModule.swift */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		60E17A442E1826D6004814E1 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				60E17A4C2E1826DB004814E1 /* SwiftyJSON.xcframework in Embed Frameworks */,
-				60E17A432E1826D6004814E1 /* MyBrainTechnologiesSDK.framework in Embed Frameworks */,
-				60E17A482E1826D8004814E1 /* RealmSwift.xcframework in Embed Frameworks */,
-				60E17A4A2E1826D9004814E1 /* SwiftyBeaver.xcframework in Embed Frameworks */,
-				60E17A462E1826D7004814E1 /* Realm.xcframework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		13B07F961A680F5B00A75B9A /* clinicalApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = clinicalApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,14 +24,9 @@
 		3B4392A12AC88292D35C810B /* Pods-clinicalApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-clinicalApp.debug.xcconfig"; path = "Target Support Files/Pods-clinicalApp/Pods-clinicalApp.debug.xcconfig"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-clinicalApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-clinicalApp.release.xcconfig"; path = "Target Support Files/Pods-clinicalApp/Pods-clinicalApp.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-clinicalApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-clinicalApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		60754F9E2E18263F00EE79C6 /* MyBrainTechnologiesSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MyBrainTechnologiesSDK.framework; sourceTree = "<group>"; };
-		60754F9F2E18263F00EE79C6 /* Realm.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:QX5CR2FTN2:Realm ApS"; lastKnownFileType = wrapper.xcframework; path = Realm.xcframework; sourceTree = "<group>"; };
-		60754FA02E18263F00EE79C6 /* RealmSwift.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:QX5CR2FTN2:Realm ApS"; lastKnownFileType = wrapper.xcframework; path = RealmSwift.xcframework; sourceTree = "<group>"; };
-		60754FA12E18263F00EE79C6 /* SwiftyBeaver.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = SwiftyBeaver.xcframework; sourceTree = "<group>"; };
-		60754FA22E18263F00EE79C6 /* SwiftyJSON.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = SwiftyJSON.xcframework; sourceTree = "<group>"; };
-		60E17A562E182B67004814E1 /* CyrebroSDKModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyrebroSDKModule.swift; sourceTree = "<group>"; };
-		60E17A582E182BA9004814E1 /* clinicalApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "clinicalApp-Bridging-Header.h"; sourceTree = "<group>"; };
-		60E17A592E182BAA004814E1 /* CyrebroSDKModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CyrebroSDKModule.m; sourceTree = "<group>"; };
+		60FFA3972E43529E00BCDB17 /* CyrebroModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyrebroModule.swift; sourceTree = "<group>"; };
+		60FFA3992E43529E00BCDB18 /* clinicalApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "clinicalApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		60FFA39A2E43529E00BCDB19 /* LSLModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LSLModule.swift; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = clinicalApp/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = clinicalApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -71,11 +38,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C80B921A6F3F58F76C31292 /* libPods-clinicalApp.a in Frameworks */,
-				60E17A472E1826D8004814E1 /* RealmSwift.xcframework in Frameworks */,
-				60E17A422E1826D6004814E1 /* MyBrainTechnologiesSDK.framework in Frameworks */,
-				60E17A4B2E1826DB004814E1 /* SwiftyJSON.xcframework in Frameworks */,
-				60E17A492E1826D9004814E1 /* SwiftyBeaver.xcframework in Frameworks */,
-				60E17A452E1826D7004814E1 /* Realm.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,8 +47,11 @@
 		13B07FAE1A68108700A75B9A /* clinicalApp */ = {
 			isa = PBXGroup;
 			children = (
+				60FFA3972E43529E00BCDB17 /* CyrebroModule.swift */,
+				60FFA39A2E43529E00BCDB19 /* LSLModule.swift */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
+				60FFA3992E43529E00BCDB18 /* clinicalApp-Bridging-Header.h */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
@@ -103,37 +68,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		60754FA32E18263F00EE79C6 /* mbt_sdk */ = {
-			isa = PBXGroup;
-			children = (
-				60754F9E2E18263F00EE79C6 /* MyBrainTechnologiesSDK.framework */,
-				60754F9F2E18263F00EE79C6 /* Realm.xcframework */,
-				60754FA02E18263F00EE79C6 /* RealmSwift.xcframework */,
-				60754FA12E18263F00EE79C6 /* SwiftyBeaver.xcframework */,
-				60754FA22E18263F00EE79C6 /* SwiftyJSON.xcframework */,
-			);
-			path = mbt_sdk;
-			sourceTree = "<group>";
-		};
-		60754FA42E18263F00EE79C6 /* module */ = {
-			isa = PBXGroup;
-			children = (
-				60E17A562E182B67004814E1 /* CyrebroSDKModule.swift */,
-				60E17A592E182BAA004814E1 /* CyrebroSDKModule.m */,
-				60E17A582E182BA9004814E1 /* clinicalApp-Bridging-Header.h */,
-			);
-			path = module;
-			sourceTree = "<group>";
-		};
-		60754FA52E18263F00EE79C6 /* cyrebro_sdk */ = {
-			isa = PBXGroup;
-			children = (
-				60754FA32E18263F00EE79C6 /* mbt_sdk */,
-				60754FA42E18263F00EE79C6 /* module */,
-			);
-			path = cyrebro_sdk;
-			sourceTree = "<group>";
-		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -144,7 +78,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				60754FA52E18263F00EE79C6 /* cyrebro_sdk */,
 				13B07FAE1A68108700A75B9A /* clinicalApp */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -187,7 +120,6 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
-				60E17A442E1826D6004814E1 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -207,7 +139,7 @@
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1600;
+						LastSwiftMigration = 1120;
 					};
 				};
 			};
@@ -322,9 +254,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				60FFA3982E43529E00BCDB17 /* CyrebroModule.swift in Sources */,
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
-				60E17A572E182B67004814E1 /* CyrebroSDKModule.swift in Sources */,
-				60E17A5A2E182BAA004814E1 /* CyrebroSDKModule.m in Sources */,
+				60FFA39B2E43529E00BCDB1A /* LSLModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,15 +269,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 23T8TD424J;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = W52LRF58NL;
 				ENABLE_BITCODE = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/cyrebro_sdk/mbt_sdk",
-				);
 				INFOPLIST_FILE = clinicalApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				INFOPLIST_KEY_CodePushDeploymentKey = UCLoWX53bWafGVlDw1JBSEPiQ2pyVJRvDT7Pzl;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -356,9 +288,10 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.clinicalApp.ios;
 				PRODUCT_NAME = clinicalApp;
-				SWIFT_OBJC_BRIDGING_HEADER = "cyrebro_sdk/module/clinicalApp-Bridging-Header.h";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "clinicalApp/clinicalApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -371,14 +304,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 23T8TD424J;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/cyrebro_sdk/mbt_sdk",
-				);
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = W52LRF58NL;
 				INFOPLIST_FILE = clinicalApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				INFOPLIST_KEY_CodePushDeploymentKey = UCLoWX53bWafGVlDw1JBSEPiQ2pyVJRvDT7Pzl;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -389,9 +322,10 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.clinicalApp.ios;
 				PRODUCT_NAME = clinicalApp;
-				SWIFT_OBJC_BRIDGING_HEADER = "cyrebro_sdk/module/clinicalApp-Bridging-Header.h";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "clinicalApp/clinicalApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -446,7 +380,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -516,7 +450,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",

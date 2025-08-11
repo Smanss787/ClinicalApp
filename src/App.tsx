@@ -62,7 +62,7 @@ function App() {
 
 // RevoPush CodePush configuration
 const codePushOptions = {
-  checkFrequency: codePush.CheckFrequency.ON_APP_START,
+  checkFrequency: "ON_APP_START",
   // Update dialog options
   updateDialog: {
     title: "An update is available!",
@@ -73,7 +73,7 @@ const codePushOptions = {
     optionalInstallButtonLabel: "Install",
   },
   // Install mode options
-  installMode: codePush.InstallMode.IMMEDIATE,
+  installMode: "IMMEDIATE",
 };
 
 export default codePush(codePushOptions)(App);

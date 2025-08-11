@@ -13,10 +13,10 @@
     "deploy-android": "node deploy-manual.js android",
     "deploy-ios": "node deploy-manual.js ios",
     "deploy-both": "node deploy-manual.js both",
-    "revopush-android": "npx @revopush/code-push-cli release-react Cormed android -d Production",
-    "revopush-android-staging": "npx @revopush/code-push-cli release-react Cormed android -d Staging",
-    "revopush-ios": "npx @revopush/code-push-cli release-react Cormed ios -d Production",
-    "revopush-ios-staging": "npx @revopush/code-push-cli release-react Cormed ios -d Staging"
+    "revopush-android": "npx @revopush/code-push-cli release-react ClinicalApp android -d Production",
+    "revopush-android-staging": "npx @revopush/code-push-cli release-react ClinicalApp android -d Staging",
+    "revopush-ios": "npx @revopush/code-push-cli release-react ClinicalApp ios -d Production",
+    "revopush-ios-staging": "npx @revopush/code-push-cli release-react ClinicalApp ios -d Staging"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -39,7 +39,7 @@
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
-    "@react-native-community/cli": "19.0.0",
+    "@react-native-community/cli": "^19.1.1",
     "@react-native-community/cli-platform-android": "19.0.0",
     "@react-native-community/cli-platform-ios": "19.0.0",
     "@react-native/babel-preset": "0.80.0",

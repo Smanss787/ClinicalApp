@@ -19,4 +19,4 @@ extension CyrebroModule: RCTBridgeModule {
   static func requiresMainQueueSetup() -> Bool {
     return false
   }
-} 
+}

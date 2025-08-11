@@ -561,7 +561,7 @@ export const HomeScreen = ({ navigation }: any) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome (Test Update 4)</Text>
+          <Text style={styles.title}>Welcome (Test Update 81)</Text>
           <Text style={styles.subtitle}>{user?.email}</Text>
           {user?.picture && (
             <Image source={{ uri: user.picture }} style={styles.avatar} />

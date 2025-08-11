@@ -8,7 +8,6 @@ buildscript {
         kotlinVersion = "2.1.20"
     }
     repositories {
-        jcenter()
         google()
         mavenCentral()
         maven {
@@ -17,29 +16,22 @@ buildscript {
         maven { url "https://repo.grails.org/grails/core/" }
     }
     dependencies {
-        classpath("com.android.tools.build:gradle")
+        classpath("com.android.tools.build:gradle:8.4.2")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
     }
 }
 allprojects {
     repositories {
-
         google()
-        jcenter()
         mavenCentral()
         maven { url "https://jitpack.io" }
-
         maven {
             url "https://plugins.gradle.org/m2/"
         }
         maven { url "https://repo.grails.org/grails/core/" }
         flatDir {
-
             dirs 'libs'
-        }
-        jcenter{
-            url "https://jcenter.bintray.com/"
         }
     }
 }

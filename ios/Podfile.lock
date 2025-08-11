@@ -7,9 +7,15 @@ PODS:
   - Auth0 (2.10.0):
     - JWTDecode (= 3.2.0)
     - SimpleKeychain (= 1.2.0)
+  - Base64 (1.1.2)
   - boost (1.84.0)
   - BVLinearGradient (2.8.3):
     - React-Core
+  - CodePush (1.2.0):
+    - Base64 (~> 1.1)
+    - JWT (~> 3.0.0-beta.12)
+    - React-Core
+    - SSZipArchive (~> 2.5.5)
   - DoubleConversion (1.1.6)
   - fast_float (8.0.0)
   - FBLazyVector (0.80.0)
@@ -18,6 +24,8 @@ PODS:
   - hermes-engine (0.80.0):
     - hermes-engine/Pre-built (= 0.80.0)
   - hermes-engine/Pre-built (0.80.0)
+  - JWT (3.0.0-beta.14):
+    - Base64 (~> 1.1.2)
   - JWTDecode (3.2.0)
   - RCT-Folly (2024.11.18.00):
     - boost
@@ -2344,14 +2352,75 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - RNSVG (15.12.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNSVG/common (= 15.12.0)
+    - SocketRocket
+    - Yoga
+  - RNSVG/common (15.12.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - SimpleKeychain (1.2.0)
   - SocketRocket (0.7.1)
+  - SSZipArchive (2.5.5)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
   - A0Auth0 (from `../node_modules/react-native-auth0`)
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
+  - "CodePush (from `../node_modules/@revopush/react-native-code-push`)"
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -2428,15 +2497,19 @@ DEPENDENCIES:
   - RNOpenAppSettings (from `../node_modules/react-native-app-settings`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - RNSVG (from `../node_modules/react-native-svg`)
   - SocketRocket (~> 0.7.1)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
     - Auth0
+    - Base64
+    - JWT
     - JWTDecode
     - SimpleKeychain
     - SocketRocket
+    - SSZipArchive
 
 EXTERNAL SOURCES:
   A0Auth0:
@@ -2445,6 +2518,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   BVLinearGradient:
     :path: "../node_modules/react-native-linear-gradient"
+  CodePush:
+    :path: "../node_modules/@revopush/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   fast_float:
@@ -2596,20 +2671,25 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-permissions"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNSVG:
+    :path: "../node_modules/react-native-svg"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
   A0Auth0: 6209ab41871e78207ceb2685e443356535793117
   Auth0: 2876d0c36857422eda9cb580a6cc896c7d14cb36
+  Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
+  CodePush: 30527d1fb9b08067fda00e2580e2c23b518ac719
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: 778b815a6fb3fa1599f581ffb9a5e85fad313c1d
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 7068e976238b29e97b3bafd09a994542af7d5c0b
+  JWT: ef71dfb03e1f842081e64dc42eef0e164f35d251
   JWTDecode: 7dae24cb9bf9b608eae61e5081029ec169bb5527
   RCT-Folly: 59ec0ac1f2f39672a0c6e6cecdd39383b764646f
   RCTDeprecation: ff787f6c860a1b97dd1bc27264b61d23ad1994da
@@ -2680,10 +2760,12 @@ SPEC CHECKSUMS:
   RNOpenAppSettings: 1169b90a275e9e18c5973e1608949f97d426e7f3
   RNPermissions: eb4bf20579ff15727be7892423099a9c0c579645
   RNScreens: 45a4564413205e2a1695d40bbc0297f6eefc9b74
+  RNSVG: c73af7848d94ca3e8136a5191d055e3c1d6fedab
   SimpleKeychain: 768cf43ae778b1c21816e94dddf01bb8ee96a075
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
+  SSZipArchive: c69881e8ac5521f0e622291387add5f60f30f3c4
   Yoga: 0c4b7d2aacc910a1f702694fa86be830386f4ceb
 
-PODFILE CHECKSUM: bfadd9b8ffaae77d27cf4dfde0a9a3799b482e7c
+PODFILE CHECKSUM: 5cf9b5965d5d71fefb8632067d6be7dd2133fce1
 
 COCOAPODS: 1.15.2

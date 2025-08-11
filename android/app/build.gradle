@@ -127,9 +127,9 @@ android {
     }
     
     // RevoPush CodePush configuration
-    // codepush {
-    //     deploymentKey = "YOUR_REVOPUSH_DEPLOYMENT_KEY"
-    // }
+    codepush {
+        deploymentKey = "UCLoWX53bWafGVlDw1JBSEPiQ2pyVJRvDT7Pzl"
+    }
 }
 
 dependencies {
